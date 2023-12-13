@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "ES5",
+        "module": "ES2022",
+        "moduleResolution": "Bundler",
+        "lib": ["DOM", "ES5"],
+        "types": ["bun-types", "./src/types.d.ts"],
+        "paths": {
+            "@modules": ["src/skellycord/modules"],
+            "@modules/*": ["src/skellycord/modules/*"],
+        }
+    }
+}
