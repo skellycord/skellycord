@@ -25,6 +25,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: nightly
-          files: build/*
           tag_name: nightly
           generate_release_notes: true
+          files: |
+            build/skellycord.min.js
+            build/preload.min.js
+            build/patcher.min.js
