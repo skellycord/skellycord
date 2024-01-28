@@ -1,7 +1,7 @@
-import { build } from "esbuild";
-import { join } from "path";
+const { build } = require("esbuild");
+const { join } = require("path");
 
-function minimalConfig(entry: string, out: string) {
+function minimalConfig(entry, out) {
     return {
         entryPoints: [entry],
         outfile: out,

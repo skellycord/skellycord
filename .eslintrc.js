@@ -27,6 +27,9 @@ module.exports = {
         "react/display-name": [
             "off"
         ],
+        "@typescript-eslint/no-var-requires": [
+            "off"
+        ],
         "@typescript-eslint/no-explicit-any": [
             "off"
         ],

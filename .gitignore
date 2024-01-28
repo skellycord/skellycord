@@ -1,5 +1,5 @@
 build
-bun.lockb
+package-lock.json
 .vscode
 .DS_Store
 node_modules

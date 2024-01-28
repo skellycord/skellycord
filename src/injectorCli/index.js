@@ -1,19 +1,20 @@
-import { join } from "path";
-import { red, green, blue, PATHS, TYPE_FLAGS } from "./constants";
-import * as fs from "fs";
-import { execSync } from "child_process";
-import pack from "../../package.json";
+const { join } = require("path");
+const { red, green, blue, PATHS, TYPE_FLAGS } = require("./constants.js");
+const fs = require("fs");
+const { execSync, exec } = require("child_process");
+const pack = require("../../package.json");
+
 
 const { platform, env, argv, exit } = process;
 
-const rebuild: boolean = argv.includes("-r");
-const uninject: boolean = argv.includes("-u");
-const unPrefix: string = uninject ? "un" : "";
+const rebuild = argv.includes("-r");
+const uninject = argv.includes("-u");
+const unPrefix = uninject ? "un" : "";
 
-let discordTarget: string = "stable";    
+let discordTarget = "stable";  
 const flagTarget = TYPE_FLAGS.find(flag => argv.some(arg => arg.toLowerCase() === flag));
 if (flagTarget) discordTarget = flagTarget.replace("-", "");
-const displayTarget: string = `discord${discordTarget !== "stable" ? `-${discordTarget}` : ""}`;
+const displayTarget = `discord${discordTarget !== "stable" ? `-${discordTarget}` : ""}`;
 
 blue(`Skellycord v${pack.version}`);
 blue(`Target: ${discordTarget} ~ OS: ${platform}`);
@@ -26,7 +27,7 @@ switch (platform) {
         // eslint-disable-next-line indent
         break;
     case "win32":
-        discordPath = join((env as { LOCALAPPDATA: string }).LOCALAPPDATA, discordPath);
+        discordPath = join(env.LOCALAPPDATA, discordPath);
         break;
 }
 
@@ -35,7 +36,7 @@ if (!discordPath || !fs.existsSync(discordPath)) {
     exit();
 }
 
-const appVersion: string = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /(\d+\.)?(\d+\.)?(\*|\d+)$/gm.test(d));
+const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /(\d+\.)?(\d+\.)?(\*|\d+)$/gm.test(d));
 const desktopCoreDir = join(discordPath, appVersion, "modules", "discord_desktop_core");
 
 const coreFile = fs.readFileSync(join(desktopCoreDir, "index.js"), "utf8");
@@ -61,7 +62,7 @@ if (!uninject) buildAndCopy();
 else deleteFiles();
 
 
-let code: string = "module.exports = require('./core.asar');";
+let code = "module.exports = require('./core.asar');";
 if (!uninject) code = "require('./skellycord/patcher.min.js');\n" + code;
 
 fs.writeFile(join(desktopCoreDir, "index.js"), code, err => {
@@ -74,7 +75,7 @@ function buildAndCopy() {
     deleteFiles();
 
     blue("Building mod...");
-    execSync(`bun ${join(__dirname, "bundle.ts")}`);
+    execSync(`node ${join(__dirname, "bundle.js")}`, { stdio: "ignore" });
 
     blue("Copying files to desktop core...");
     const buildDir = join(__dirname, "..", "..", "build", "skellycord");

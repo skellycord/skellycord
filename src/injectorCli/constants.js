@@ -1,15 +1,15 @@
-import { homedir } from "os";
+const { homedir } = require("os");
 
 // whats chalk
-export const green = string => console.log(`\x1b[32m|\x1b[0m ${string}`);
-export const red = string => console.error(`\x1b[31m|\x1b[0m ${string}`);
-export const blue = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
-export const yellow = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
+exports.green = string => console.log(`\x1b[32m|\x1b[0m ${string}`);
+exports.red = string => console.error(`\x1b[31m|\x1b[0m ${string}`);
+exports.blue = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
+exports.yellow = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
 
-export const TYPE_FLAGS: string[] = ["-stable", "-ptb", "-canary"];
+exports.TYPE_FLAGS = ["-stable", "-ptb", "-canary"];
 
 // todo: find more linux paths
-export const PATHS = {
+exports.PATHS = {
     win32: {
         stable: "Discord",
         ptb: "DiscordPTB",
