@@ -1,5 +1,6 @@
 type basicJsonTypes = boolean | string | number | any[];
 
+
 export default class ConfigHandler {
     private data: Record<string, any> = {};
     configName: string;
@@ -40,5 +41,4 @@ export default class ConfigHandler {
         this.set(key, !value);
         return !value; 
     }
-
 }

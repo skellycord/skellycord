@@ -14,5 +14,8 @@
     "inject": "bun src/injectorCli/index.ts",
     "reinject": "bun run inject -r",
     "uninject": "bun run inject -u"
+  },
+  "dependencies": {
+    "electron-react-devtools": "^0.5.3"
   }
 }

@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface PatchFuncTypes {
     before: (args: IArguments, thisObj: any) => any,
@@ -25,18 +27,51 @@ function _patchTarget({ type, obj, target, patchFn }: {
     if (!obj || !obj[target]) throw new TypeError(`${target} is undefined!`);
     let patchData: PatchData = obj[target][patchSym];
     if (!obj[target][patchSym]) {
-        const og = obj[target];
+        const og = Object.freeze(obj[target]);
         patchData = {
             before: [],
             instead: [],
             after: [],
             og
         };
+        
+        patchData[type].push(patchFn);
+
+        const descriptor = Object.getOwnPropertyDescriptor(obj, target);
+        if (descriptor && descriptor.get) {
+            try {
+                Object.defineProperty(obj, target, {
+                    configurable: true,
+                    enumerable: true,
+                    ...descriptor,
+                    get: () => _replaceFunc(patchData),
+                    set: (value) => (patchData.og = value),
+                });
+            } catch (e) {
+                logger.error("Writer", e);
+            }
+        }
+        else obj[target] = _replaceFunc(patchData);
+
+        Object.defineProperties(obj[target], Object.getOwnPropertyDescriptors(og));
+        obj[target].toString = og.toString;
+        /*Object.defineProperty(obj, target, { 
+            get: () => new Proxy(obj, {
+                [target]: _replaceFunc(patchData),
+                [patchSym]: patchData
+            }),
+            set: v => patchData.og = v,
+            ...descriptors,
+            configurable: true,
+            enumerable: true
+        });
 
         Object.defineProperty(obj[target], patchSym, {
-            get: () => patchData,
+            value: patchData,
+            writable: true,
             configurable: true
-        });
+        });*/
+
         /*const descriptors = Object.getOwnPropertyDescriptors(patchData.og);
         const keys = {};
         for (const x of Object.keys(descriptors)) {
@@ -45,16 +80,22 @@ function _patchTarget({ type, obj, target, patchFn }: {
         }*/
         // obj[target] = [];
     }
-    patchData[type].push(patchFn);
-    Object.defineProperty(obj, target, { get: () => _replaceFunc(patchData) });
-    // obj[target] = replacement;
-
-    // obj[target].toString = replacement.toString;
+    else {
+        patchData[type].push(patchFn);
+    }
 
     return () => {
         patchData[type].splice(patchData[type].findIndex(patchFn), 1);
-        // if (patchData.after.length + patchData.before.length + patchData.instead.length == 0) 
-        Object.defineProperty(obj, target, { get: () => _replaceFunc(patchData) });
+        if (patchData.after.length + patchData.before.length + patchData.instead.length == 0) Object.defineProperty(obj, target, { 
+            value: patchData.og, 
+            writable: true,
+            configurable: true
+        });
+        else Object.defineProperty(obj, target, { 
+            get: () => _replaceFunc(patchData), 
+            writable: true,
+            configurable: true
+        });
     };
 }
 
@@ -90,12 +131,12 @@ function _replaceFunc(patchData: PatchData) {
             }
         }
 
-        /*for (const patch of patchData.after) {
+        for (const patch of patchData.after) {
             const ret = patch.call(this, args, res, this);
             if (ret !== void 0) {
                 res = ret;
             }
-        }*/
+        }
         
         if (error) throw error;
         return res;

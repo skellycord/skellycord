@@ -67,7 +67,7 @@ if (!uninject) code = "require('./skellycord/patcher.min.js');\n" + code;
 fs.writeFile(join(desktopCoreDir, "index.js"), code, err => {
     if (err) red(`An error occured in writing to the desktop core.\n${err}`);
     // todo, kill discord process
-    else green(`Skellycord ${unPrefix}injected successfully! Be sure to restart ${displayTarget}.`);
+    else green(`Skellycord ${unPrefix}injected successfully. Be sure to restart ${displayTarget}.`);
 });
 
 function buildAndCopy() {
@@ -83,7 +83,7 @@ function buildAndCopy() {
         fs.writeFileSync(join(desktopCoreDir, "skellycord", file), fs.readFileSync(join(buildDir, file)));
     }
 
-    if (rebuild) green("Skellycord rebuilt successfully!");
+    if (rebuild) green("Skellycord rebuilt successfully.");
 }
 
 function deleteFiles() {

@@ -6,7 +6,7 @@ function minimalConfig(entry: string, out: string) {
         entryPoints: [entry],
         outfile: out,
         sourcemap: true,
-        minify: true,
+        minify: false,
         bundle: true,
         logLevel: "info"
     };
@@ -16,7 +16,7 @@ function buildMod() {
     // electron patcher
     build({
         ...minimalConfig(
-            join(__dirname, "..", "electron", "patcher.ts"),
+            join(__dirname, "..", "electron", "patcher"),
             join(__dirname, "..", "..", "build", "skellycord", "patcher.min.js")
         ),
         banner: { js: "/* skellycord electron main patcher */" },
@@ -28,7 +28,7 @@ function buildMod() {
     // electron renderer
     build({
         ...minimalConfig(
-            join(__dirname, "..", "electron", "preload.ts"),
+            join(__dirname, "..", "electron", "preload"),
             join(__dirname, "..", "..", "build", "skellycord", "preload.min.js")
         ),
         banner: { js: "/* skelly electron renderer patcher */" },
@@ -45,8 +45,9 @@ function buildMod() {
         banner: { js: "/* skellycord mod */" },
         platform: "browser",
         logLevel: "info",
-        jsxFactory: "window.webpack.common.React",
-        jsxFragment: "window.webpack.common.React.Component"
+        keepNames: true,
+        jsxFactory: "window.skellycord.webpack.common.React.createElement",
+        jsxFragment: "window.skellycord.webpack.common.React.Component"
     });
 }
 
