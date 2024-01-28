@@ -1,13 +1,11 @@
 # Skellycord
 Discord modification (currently wip)
 
-## Installation
-Skellycord builds with [bun](https://bun.sh/).
-
+## Usage
 ```bash
-bun i
+npm i
 
-bun run inject [-stable|ptb|canary]
-bun run reinject [-stable|ptb|canary]
-bun run uninject [-stable|ptb|canary]
+npm run inject [-- -stable|ptb|canary]
+npm run reinject [-- -stable|ptb|canary]
+npm run uninject [-- -stable|ptb|canary]
 ```

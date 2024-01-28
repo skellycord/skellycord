@@ -12,14 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: "19.0.1"
       
       - name: Install Modules and Build
         run: |
-          bun i
-          bun run build
+          npm i
+          npm run build
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
