@@ -53,7 +53,7 @@ async function _build() {
 
     buildFile("electron", [{ out: "preload.min", in: injectorJoin("electron", "preload") }]);
 
-    buildFile("electron", [{ out: "splash.min", in: injectorJoin("electron", "preload", "splash") }]);
+    // buildFile("electron", [{ out: "splash.min", in: injectorJoin("electron", "preload", "splash") }]);
 
     buildFile("mod", [{ out: "skellycord.min", in: injectorJoin("skellycord") }]);
 
