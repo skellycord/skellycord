@@ -2,7 +2,7 @@ import { build } from "esbuild";
 import { argv } from "process";
 import constants from "./constants.js";
 const { injectorJoin, green } = constants;
-import { writeFileSync, readFileSync } from "fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "fs";
 import ts from "typescript";
 import packageFile from "../../package.json" assert { type: "json" };
 
@@ -49,6 +49,7 @@ async function buildFile(compileTarget, entryPoints) {
 }
 
 async function _build() {
+    if (!existsSync(injectorJoin("..", "dist"))) mkdirSync(injectorJoin("..", "dist"));
     buildFile("electron", [{ out: "patcher.min", in: injectorJoin("electron", "patcher") }]);
 
     buildFile("electron", [{ out: "preload.min", in: injectorJoin("electron", "preload") }]);
