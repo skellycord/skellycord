@@ -1,10 +1,18 @@
+const { existsSync, mkdirSync } = require("fs");
 const { homedir } = require("os");
+const { join } = require("path");
 
 // whats chalk
 exports.green = string => console.log(`\x1b[32m|\x1b[0m ${string}`);
 exports.red = string => console.error(`\x1b[31m|\x1b[0m ${string}`);
 exports.blue = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
 exports.yellow = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
+
+exports.injectorJoin = (...strings) => join(__dirname, "..", ...strings);
+
+exports.makeDirIfNonExistent = path => {
+    if (!existsSync(path)) mkdirSync(path);
+};
 
 exports.TYPE_FLAGS = ["-stable", "-ptb", "-canary"];
 

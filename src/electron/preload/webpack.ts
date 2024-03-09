@@ -1,3 +1,4 @@
+// https://github.com/BetterDiscord/BetterDiscord/blob/d390a6966e03619dd504c84224e9cfaefcbff851/preload/src/patcher.js
 export default function webpackPatch() {
     const wpName = "webpackChunkdiscord_app";
     const predef = (obj, target, effect) => {

@@ -1,11 +1,13 @@
-export default (css: string) => {
+export default function(css: string) {
     const coolStyle = document.createElement("style");
     coolStyle.id = "_skellycord-css";
-    coolStyle.textContent = css;
-    document.head.appendChild(coolStyle);
+    coolStyle.textContent = /http(s?):\/\//.test(css) ? `@import url(${css});` : css;
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => document.body.appendChild(coolStyle));
+    else document.body.appendChild(coolStyle);
     
-    return () => {
-        document.head.removeChild(coolStyle);
-        coolStyle.remove();
+    return {
+        edit: (content: string) => coolStyle.textContent = content,
+        revert: () => coolStyle.remove()
     };
-};
+}

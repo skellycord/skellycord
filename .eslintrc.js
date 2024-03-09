@@ -21,10 +21,16 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
+        "react/prop-types": [
+            "off"
+        ],
         "react/no-unescaped-entities": [
             "off"
         ],
         "react/display-name": [
+            "off"
+        ],
+        "react/jsx-key": [
             "off"
         ],
         "@typescript-eslint/no-var-requires": [

@@ -31,6 +31,16 @@ export default class Logger {
     error(...data) {
         console.error(...this.makeCssBit("error"), ...data);
     }
+
+    group(...data) {
+        console.group(...this.makeCssBit("log"), ...data);
+    }
+
+    groupCollapsed(...data) {
+        console.groupCollapsed(...this.makeCssBit("log"), ...data);
+    }
+
+
 }
 
 export const logger = new Logger("Skellycord");

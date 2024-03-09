@@ -1,14 +1,18 @@
 {
     "compilerOptions": {
+        "rootDir": "./src/skellycord",
         "baseUrl": ".",
         "target": "ES6",
         "module": "ES2022",
         "moduleResolution": "Bundler",
+        "declaration": true,
+        "types": ["./src/css.d.ts", "./src/globals.d.ts"],
+        "emitDeclarationOnly": true,
         "lib": ["DOM", "ES2022"],
         "jsx": "react",
         "paths": {
-            "@skellycord": ["src/skellycord/"],
-            "@skellycord/*": ["src/skellycord/*"],
+            "@skellycord/*": ["src/skellycord/*"]
         }
-    }
+    },
+    "include": ["./src/skellycord"]
 }

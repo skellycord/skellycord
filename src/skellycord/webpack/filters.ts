@@ -1,54 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export default {
-    /*byPartialProp: (prop: string) => (mod: any) => {
-        const modKeys = typeof mod === "object" ? Object.keys(mod) : mod;
-        let partialFound: boolean = false;
-        for (const key in modKeys) {
-            partialFound = String(key).includes(prop);
-            if (partialFound) break;
-        }
+import { sourceBits } from "./utils";
 
-        return partialFound;
-    },*/
-    byProps: (...props: string[]) => (mod: any) => {
-        let propCount: number = 0;
+export function byProps(...props: string[]) {
+    return (mod: any) => {
+        let propsCount: number = 0;
         for (const p of props) {
-            if (mod?.[p]) propCount++;
+            if (mod?.[p]) propsCount++;
         }
-        return propCount === props.length;
-    },
-    byPrototypes: (...protos: string[]) => (mod: any) => {
+        return propsCount === props.length;
+    };
+}
+
+export function byPrototypes(...protos: string[]) {
+    return (mod: any) => {
         let protoCount: number = 0;
         for (const p of protos) {
             if (mod?.prototype?.[p]) protoCount++;
         }
         return protoCount === protos.length;
-    },
-    byStrings: (...strings: string[]) => (mod: any) => {
-        const funcString = stringObj(mod);
-        let stringCount: number = 0;
-        for (const s of strings) {
-            if (funcString.includes(s)) stringCount++;
-        }
+    };
+}
 
-        return stringCount == strings.length;
-    },
-    byRegex: (re: RegExp) => (mod: any) => {
-        const funcString = stringObj(mod);
-        
-        if (!funcString || funcString == "") return false;
-        return re.test(funcString);
-    },
-    byDisplayName: (displayName: string) => (mod: any) => (mod?.displayName && mod?.displayName == displayName),
-    byStoreName: (storeName: string) => (mod: any) => (mod?._dispatchToken && mod?.getName?.() == storeName),
-};
+export function bySourceCode(re: RegExp) {
+    for (const source of Object.keys(sourceBits)) {
+        if (re.test(sourceBits[source])) return source;
+    }
+}
 
+export function byDisplayName(displayName: string) {
+    return (mod: any) => (mod?.displayName && mod?.displayName == displayName);
+}
 
-function stringObj(obj: any) {
-    if (typeof obj !== "function") return "";
-    let targetString: string = "";
-    if (typeof obj.toString === "string") targetString = obj.toString;
-    else targetString = Function.prototype.toString.call(obj);
-
-    return targetString;
+export function byStoreName(storeName: string) {
+    return (mod: any) => (mod?._dispatchToken && mod?.getName?.() == storeName);
 }

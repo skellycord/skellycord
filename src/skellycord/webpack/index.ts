@@ -1,10 +1,8 @@
-/* @ts-ignore */
-import filters from "./filters";
-import { wpRequire } from "./wpUtils";
+import * as filters from "./filters";
+import { sourceBits, wpRequire } from "./utils";
 
 export function getModule(predicate: (m: any) => boolean) {
-    for (const m of Object.values(wpRequire.c)) {
-        // @ts-ignore  
+    for (const m of Object.values(wpRequire.c) as any[]) {
         if (!m || !m.exports) continue;
         if (predicate(m)) return m;
         if (predicate(m.exports)) return m.exports;
@@ -12,27 +10,10 @@ export function getModule(predicate: (m: any) => boolean) {
     }
 }
 
-export async function getLazy(predicate: (m: any) => boolean) {
-    while (!getModule(predicate)) await new Promise(r => setTimeout(r, 1));
-    return getModule(predicate);
-}
-
-export function getAllModules(predicate: (m: any) => boolean) {
-    const all = [];
-    for (const m of Object.values(wpRequire.c)) { 
-        if (!m || !m.exports) continue;
-        if (predicate(m)) {
-            all.push(m);
-            continue;
-        }
-        if (predicate(m.exports)) {
-            all.push(m.exports);
-            continue;
-        }
-        if (predicate(m.exports?.default)) all.push(m.exports?.default);
+export function getViaSource(re: RegExp) {
+    for (const source of Object.keys(sourceBits)) {
+        if (re.test(sourceBits[source])) return wpRequire.c[source].exports;
     }
-  
-    return all;
 }
 
 export function getViaDisplayName(displayName: string) {
@@ -51,10 +32,8 @@ export function getViaPrototypes(...protos: string[]) {
     return getModule(filters.byPrototypes(...protos));
 }
 
-export function getViaRegex(re: RegExp) {
-    return getModule(filters.byRegex(re));
-}
-
 export * as common from "./common";
-export { default as filters } from "./filters";
-export * as wpUtils from "./wpUtils";
+export * as filters from "./filters";
+export * as utils from "./utils";
+export * as lazy from "./lazy";
+export * as all from "./all";

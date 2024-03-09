@@ -12,22 +12,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v4
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: "19.0.1"
+          bun-version: "1.0.16"
       
       - name: Install Modules and Build
         run: |
-          npm i
-          npm run build
+          bun i
+          bun bun:build --ghSha=${{ github.sha }}
+          cd types
+          mv ../dist/skellycord.d.ts .
+          npm --no-git-tag-version version patch
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: nightly
           tag_name: nightly
-          generate_release_notes: true
+          generate_release_notes: false
           files: |
-            build/skellycord/skellycord.min.js
-            build/skellycord/preload.min.js
-            build/skellycord/patcher.min.js
+            dist/skellycord/skellycord.min.js
+            dist/skellycord/preload.min.js
+            dist/skellycord/patcher.min.js
+            dist/skellycord/types/skellycord.d.ts
+      
+      - name: Publish Types
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: "https://npm.pkg.github.com"
+          package: types
+          

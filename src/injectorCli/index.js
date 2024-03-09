@@ -3,6 +3,7 @@ const { red, green, blue, PATHS, TYPE_FLAGS } = require("./constants.js");
 const fs = require("fs");
 const { execSync } = require("child_process");
 const pack = require("../../package.json");
+const { argv0 } = require("process");
 
 
 const { platform, env, argv, exit } = process;
@@ -63,13 +64,13 @@ else if (uninject) {
 if (!uninject) buildAndCopy();
 else deleteFiles();
 
-
 let code = "module.exports = require('./core.asar');";
 if (!uninject) code = "require('./skellycord/patcher.min.js');\n" + code;
 
 fs.writeFile(join(desktopCoreDir, "index.js"), code, err => {
-    if (err) red(`An error occured in writing to the desktop core.\n${err}`);
-    // todo, kill discord process
+    if (err) red(`An error occured while writing to the desktop core.\n${err}`);
+    // todo: kill discord process
+    // is that even possible from shell...
     else green(`Skellycord ${unPrefix}injected successfully. Be sure to restart ${displayTarget}.`);
 });
 
@@ -77,12 +78,12 @@ function buildAndCopy() {
     deleteFiles();
 
     blue("Building mod...");
-    execSync(`node ${join(__dirname, "bundle.js")}`, { stdio: "ignore" });
+    execSync("npm run build", { stdio: "ignore" });
 
     blue("Copying files to desktop core...");
-    const buildDir = join(__dirname, "..", "..", "build", "skellycord");
+    const buildDir = join(__dirname, "..", "..", "dist");
     if (!fs.existsSync(join(desktopCoreDir, "skellycord"))) fs.mkdirSync(join(desktopCoreDir, "skellycord"));
-    for (const file of fs.readdirSync(buildDir)) {
+    for (const file of fs.readdirSync(buildDir).filter(m => m.includes(".min.js"))) {
         fs.writeFileSync(join(desktopCoreDir, "skellycord", file), fs.readFileSync(join(buildDir, file)));
     }
 

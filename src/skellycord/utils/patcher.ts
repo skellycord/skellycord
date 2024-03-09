@@ -17,7 +17,6 @@ interface PatchData {
 const patchSym: string = "skellycord.patches";
 // const _patches:Map<string, PatchData> = new Map();
 
-
 function _patchTarget({ type, obj, target, patchFn }: {
     type: "before" | "instead" | "after", 
     obj: Record<string, any>,
@@ -48,7 +47,7 @@ function _patchTarget({ type, obj, target, patchFn }: {
                     set: (value) => (patchData.og = value),
                 });
             } catch (e) {
-                logger.error("Writer", e);
+                logger.error("Couldn't patch module", e);
             }
         }
         else obj[target] = _replaceFunc(patchData);
@@ -115,7 +114,7 @@ function _replaceFunc(patchData: PatchData) {
 
         for (const patch of patchData.instead) {
             try {
-                res = patch.call(this, args, patchData.og);
+                res = patch.call(this, args, patchData.og, this);
             }
             catch (e) {
                 error = e;
@@ -143,14 +142,14 @@ function _replaceFunc(patchData: PatchData) {
     };
 }
 
-export function before(obj: Record<string, any>, target: string, patchFn: (args: any[], thisObj: any) => unknown) {
+export function before(obj: Record<string, any>, target: keyof typeof obj, patchFn: (args: any[], thisObj: any) => unknown) {
     return _patchTarget({ type: "before", obj, target, patchFn });
 }
 
-export function instead(obj: Record<string, any>, target: string, patchFn: (args: any[], og: (...args: IArguments[]) => unknown, thisObj: any) => unknown) {
+export function instead(obj: Record<string, any>, target: keyof typeof obj, patchFn: (args: any[], og: (...args: IArguments[]) => unknown, thisObj: any) => unknown) {
     return _patchTarget({ type: "instead", obj, target, patchFn });
 }
 
-export function after(obj: Record<string, any>, target: string, patchFn: (args: any[], res: any, thisObj: any) => unknown) {
+export function after(obj: Record<string, any>, target: keyof typeof obj, patchFn: (args: any[], res: any, thisObj: any) => unknown) {
     return _patchTarget({ type: "after", obj, target, patchFn });
 }
