@@ -45,7 +45,7 @@ async function buildFile(compileTarget, entryPoints) {
         ...extraData
     });
 
-    makeFiles(entryPoints, curBuild, compileTarget);
+    makeFiles(curBuild);
 }
 
 async function _build() {
@@ -104,11 +104,8 @@ async function _build() {
 }
 
 
-function makeFiles(entryPoints, buildRes, compileTarget) {
+function makeFiles(buildRes) {
     if (buildRes.errors?.length) return console.error(buildRes.errors);
-
-    const manifestsFailed = [];
-    const manifestsWritten = [];
     for (const i in buildRes.outputFiles) {
         const out = buildRes.outputFiles[i];
         
