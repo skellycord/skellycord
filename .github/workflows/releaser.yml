@@ -32,10 +32,10 @@ jobs:
           tag_name: nightly
           generate_release_notes: false
           files: |
-            dist/skellycord/skellycord.min.js
-            dist/skellycord/preload.min.js
-            dist/skellycord/patcher.min.js
-            dist/skellycord/types/skellycord.d.ts
+            dist/skellycord.min.js
+            dist/preload.min.js
+            dist/patcher.min.js
+            dist/skellycord.d.ts
       
       - name: Publish Types
         uses: JS-DevTools/npm-publish@v3
