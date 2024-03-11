@@ -3,6 +3,7 @@ const { red, green, blue, TYPE_FLAGS, findPath, injectorJoin } = require("./cons
 const fs = require("fs");
 const { execSync } = require("child_process");
 const pack = require("../../package.json");
+const { argv0 } = require("process");
 
 
 const { platform, argv, exit } = process;
@@ -16,8 +17,8 @@ const flagTarget = TYPE_FLAGS.find(flag => argv.some(arg => arg.toLowerCase() ==
 if (flagTarget) discordTarget = flagTarget.replace("-", "");
 const displayTarget = `discord${discordTarget !== "stable" ? `-${discordTarget}` : ""}`;
 
-blue(`Skellycord v${pack.version}`);
-blue(`Target: ${discordTarget} ~ OS: ${platform}`);
+blue(`Skellycord v${pack.version}`, true);
+blue(`Target: ${discordTarget} ~ OS: ${platform}`, true);
 
 let discordPath = findPath(discordTarget);
 
@@ -26,7 +27,7 @@ if (!discordPath || !fs.existsSync(discordPath)) {
     exit();
 }
 
-const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /(([0-999]*)\.)?(([0-999]*)\.)?(([0-999]*))$/.test(d));
+const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
 const coreThing = ["discord_desktop_core"];
 if (platform === "win32") coreThing.splice(0, 0, "discord_desktop_core-1");
 const desktopCoreDir = join(discordPath, appVersion, "modules", ...coreThing);
@@ -67,7 +68,17 @@ function buildAndCopy() {
     deleteFiles();
 
     blue("Building mod...");
-    execSync("npm run build", { stdio: "ignore" });
+    let cmd;
+    switch (argv0) {
+        case "node":
+        case "npm":
+            cmd = "npm run build";
+            break;
+        case "bun":
+            cmd = "bun bun:build";
+    }
+    
+    execSync(cmd);
 
     blue("Copying files to desktop core...");
     const buildDir = injectorJoin("..", "dist");

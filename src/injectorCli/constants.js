@@ -4,10 +4,11 @@ const { join } = require("path");
 const { env, platform } = require("process");
 
 // whats chalk
-exports.green = string => console.log(`\x1b[32m|\x1b[0m ${string}`);
-exports.red = string => console.error(`\x1b[31m|\x1b[0m ${string}`);
-exports.blue = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
-exports.yellow = string => console.log(`\x1b[34m|\x1b[0m ${string}`);
+const makeLog = (string, color, bold=false, prefix="|") => console.log(`${bold ? "\x1b[1m" : ""}\x1b[${color}m${prefix}\x1b[0m${bold ? "\x1b[1m" : ""} ${string} ${bold ? "\x1b[0m" : ""}`);
+exports.green = (string, bold=false, prefix="|") => makeLog(string, "32", bold, prefix);
+exports.red = (string, bold=false, prefix="|") => makeLog(string, "31", bold, prefix);
+exports.blue = (string, bold=false, prefix="|") => makeLog(string, "34", bold, prefix);
+exports.yellow = (string, bold=false, prefix="|") => makeLog(string, "33", bold, prefix);
 
 exports.injectorJoin = (...strings) => join(__dirname, "..", ...strings);
 
