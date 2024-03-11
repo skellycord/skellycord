@@ -21,11 +21,8 @@
     "bun:uninject": "bun bun:inject -u"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0",
-    "electron-devtools-installer": "^3.2.0",
     "esbuild": "^0.20.1",
     "esbuild-monaco-editor-plugin": "^0.1.1",
-    "monaco-editor": "^0.46.0",
     "typescript": "^5.4.2"
   }
 }

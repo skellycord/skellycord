@@ -1,8 +1,6 @@
 // goosemoddery
 // https://github.com/GooseMod/GooseMod/blob/master/src/util/discord/fixLocalStorage.js
 export default function() {
-    const { console: ogConsole } = window;
-    ogConsole.log("LMAOOOOOOOOOO");
     const frame = document.createElement("frame");
     frame.src = "about:blank";
 
@@ -13,6 +11,4 @@ export default function() {
     Object.defineProperty(window, "localStorage", storageDef);
 
     frame.remove();
-
-
 }
