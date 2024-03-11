@@ -1,12 +1,11 @@
 const { join } = require("path");
-const { red, green, blue, PATHS, TYPE_FLAGS } = require("./constants.js");
+const { red, green, blue, TYPE_FLAGS, findPath, injectorJoin } = require("./constants.js");
 const fs = require("fs");
 const { execSync } = require("child_process");
 const pack = require("../../package.json");
-const { argv0 } = require("process");
 
 
-const { platform, env, argv, exit } = process;
+const { platform, argv, exit } = process;
 
 const rebuild = argv.includes("-r");
 const uninject = argv.includes("-u");
@@ -20,24 +19,14 @@ const displayTarget = `discord${discordTarget !== "stable" ? `-${discordTarget}`
 blue(`Skellycord v${pack.version}`);
 blue(`Target: ${discordTarget} ~ OS: ${platform}`);
 
-let discordPath = PATHS[platform][discordTarget];
-
-switch (platform) {
-    case "linux":
-        discordPath = discordPath.find(p => fs.existsSync(p));
-        // eslint-disable-next-line indent
-        break;
-    case "win32":
-        discordPath = join(env.LOCALAPPDATA, discordPath);
-        break;
-}
+let discordPath = findPath(discordTarget);
 
 if (!discordPath || !fs.existsSync(discordPath)) {
     red(`No ${displayTarget} installation found.`);
     exit();
 }
 
-const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /(\d+\.)?(\d+\.)?(\*|\d+)$/gm.test(d));
+const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /(([0-999]*)\.)?(([0-999]*)\.)?(([0-999]*))$/.test(d));
 const coreThing = ["discord_desktop_core"];
 if (platform === "win32") coreThing.splice(0, 0, "discord_desktop_core-1");
 const desktopCoreDir = join(discordPath, appVersion, "modules", ...coreThing);
@@ -81,7 +70,7 @@ function buildAndCopy() {
     execSync("npm run build", { stdio: "ignore" });
 
     blue("Copying files to desktop core...");
-    const buildDir = join(__dirname, "..", "..", "dist");
+    const buildDir = injectorJoin("..", "dist");
     if (!fs.existsSync(join(desktopCoreDir, "skellycord"))) fs.mkdirSync(join(desktopCoreDir, "skellycord"));
     for (const file of fs.readdirSync(buildDir).filter(m => m.includes(".min.js"))) {
         fs.writeFileSync(join(desktopCoreDir, "skellycord", file), fs.readFileSync(join(buildDir, file)));
@@ -96,7 +85,7 @@ function deleteFiles() {
         fs.rmdirSync(join(desktopCoreDir, "skellycord"), { recursive: true });
     }
 
-    if (fs.existsSync(join(__dirname, "..", "..", "build", "skellycord"))) {
-        fs.rmdirSync(join(__dirname, "..", "..", "build", "skellycord"), { recursive: true });
-    }
+    /*if (fs.existsSync(injectorJoin("..", "dist"))) {
+        fs.rmdirSync(injectorJoin("..", "dist"), { recursive: true });
+    }*/
 }

@@ -54,21 +54,7 @@ async function _build() {
 
     buildFile("electron", [{ out: "preload.min", in: injectorJoin("electron", "preload") }]);
 
-    // buildFile("electron", [{ out: "splash.min", in: injectorJoin("electron", "preload", "splash") }]);
-
     buildFile("mod", [{ out: "skellycord.min", in: injectorJoin("skellycord") }]);
-
-    // buildFile("plugin", [{ out: "pluginStores/SkellyStore/store", in: injectorJoin("skellycord", "plugins", "SkellyStore", "index") }]);
-
-    // buildFile("plugin", [{ out: "pluginStores/DogStore/store", in: injectorJoin("skellycord", "plugins", "DogStore", "index") }]);
-
-    /*build({
-        entryPoints: [injectorJoin("skellycord", "globals.d")],
-        bundle: true,
-        write: false,
-        external: ["@skellycord/*"],
-        plugins: [dtsPlugin({ })]
-    });*/
 
     const program = ts.createProgram([injectorJoin("skellycord", "index")], {
         rootNames: [injectorJoin("skellycord", "index")],
@@ -90,7 +76,7 @@ async function _build() {
             "\""
         );
 
-        // adds css.d.ts and globals.d.ts to the types because i don't know how to bundle them otherwise :D
+        // adds css.d.ts to the types because i don't know how to bundle it otherwise :D
         const cssThing = readFileSync(injectorJoin("css.d.ts"), "utf8");
         txt += cssThing;
         

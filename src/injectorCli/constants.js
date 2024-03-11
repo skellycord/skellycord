@@ -1,6 +1,7 @@
 const { existsSync, mkdirSync } = require("fs");
 const { homedir } = require("os");
 const { join } = require("path");
+const { env, platform } = require("process");
 
 // whats chalk
 exports.green = string => console.log(`\x1b[32m|\x1b[0m ${string}`);
@@ -16,33 +17,20 @@ exports.makeDirIfNonExistent = path => {
 
 exports.TYPE_FLAGS = ["-stable", "-ptb", "-canary"];
 
-// todo: find more linux paths
-exports.PATHS = {
-    win32: {
-        stable: "Discord",
-        ptb: "DiscordPTB",
-        canary: "DiscordCanary"
-    },
-    linux: {
-        stable: [
-            "/usr/share/discord",
-            "/usr/lib64/discord",
-            "/opt/discord"
-        ],
-        ptb: [
-            "/usr/share/discord-ptb",
-            "/usr/lib64/discord-ptb",
-            "/opt/discord-ptb"
-        ],
-        canary: [
-            "/usr/share/discord-canary",
-            "/usr/lib64/discord-canary",
-            "/opt/discord-canary"
-        ]
-    },
-    darwin: {
-        stable: homedir() + "/Library/Application Support/discord",
-        ptb: homedir() + "/Library/Application Support/discordptb",
-        canary: homedir() + "/Library/Application Support/discordcanary"
+const MACOS_PARTIAL_PATH = ["Library", "Application Support"];
+const LINUX_PARTIAL_PATH = [".config"];
+
+function findPath(target) {
+    let suffix = target !== "stable" ? target : "";
+    switch (platform) {
+        case "win32": 
+            const suffixSplit = suffix.split("");
+            suffixSplit[0] = suffixSplit[0].toUpperCase(0);
+            suffix = suffixSplit.join("");
+            return join(env.LOCALAPPDATA, "Discord" + suffix);
+        case "darwin": return join(homedir(), ...MACOS_PARTIAL_PATH, "discord" + suffix);
+        case "linux": return join(homedir(), ...LINUX_PARTIAL_PATH, "discord" + suffix);
     }
-};
+}
+
+exports.findPath = findPath;

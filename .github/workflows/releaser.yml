@@ -21,26 +21,16 @@ jobs:
         run: |
           bun i
           bun bun:build --ghSha=${{ github.sha }}
-          cd types
-          mv ../dist/skellycord.d.ts .
-          npm --no-git-tag-version version patch
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: nightly
           tag_name: nightly
-          generate_release_notes: false
+          generate_release_notes: true
           files: |
             dist/skellycord.min.js
             dist/preload.min.js
             dist/patcher.min.js
             dist/skellycord.d.ts
-      
-      - name: Publish Types
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          registry: "https://npm.pkg.github.com"
-          package: types
           
