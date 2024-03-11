@@ -1,9 +1,3 @@
-export enum SkellycordSettings {
-    CORE = "SkellycordCore",
-    PLUGIN = "SkellycordPlugins",
-    THEME = "SkellycordTheme"
-}
-
 type Primitives = string | number | boolean;
 type Schema = { [x: string]: Primitives | Primitives[] };
 
@@ -12,8 +6,8 @@ export default class Settings<Config = Schema> {
     private data: Record<string, any>;
     private key: string;
 
-    static openConfig<T = Schema>(configName: string, settingsGroup: SkellycordSettings = SkellycordSettings.PLUGIN) {
-        const key = `${settingsGroup}_${configName}`;
+    static openConfig<T = Schema>(configName: string, isPlugin = true) {
+        const key = `${isPlugin ? "SkellyPlugin_" : ""}${configName}`;
         if (this.INSTANCES[key]) return this.INSTANCES[key];
         
         const freshSettings = new Settings<T>(key, false);

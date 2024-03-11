@@ -7,7 +7,7 @@ export default function(css: string) {
     else document.body.appendChild(coolStyle);
     
     return {
-        edit: (content: string) => coolStyle.textContent = content,
+        edit: (content: string) => coolStyle.textContent = /http(s?):\/\//.test(content) ? `@import url(${content});` : content,
         revert: () => coolStyle.remove()
     };
 }

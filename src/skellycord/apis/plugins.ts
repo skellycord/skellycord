@@ -1,5 +1,5 @@
 import { settings } from "@skellycord/utils";
-import { CORE_STORE, CORE_STORE_LINK } from "@skellycord/utils/constants";
+import { CORE_STORE, CORE_STORE_LINK, SETTINGS_KEY } from "@skellycord/utils/constants";
 import { logger } from "@skellycord/utils/logger";
 
 export const loaded: { [x: string]: Plugin } = {};
@@ -8,14 +8,17 @@ export const stores: { [x: string]: PluginStore } = {};
 let coreSettings: settings;
 
 export async function init() {
-    coreSettings = settings.openConfig(CORE_STORE);
+    coreSettings = settings.openConfig(SETTINGS_KEY);
     
     for (const storeLink of coreSettings.get("storeLinks", [CORE_STORE_LINK])) {
         try {
             fetchStore(storeLink);
         }
         catch (e) {
-            logger.error(`Store link "${storeLink}" failed to load`, e.stack);
+            if (storeLink === CORE_STORE_LINK) {
+                
+            }
+            logger.error(`Plugin store "${storeLink}" failed to load`, e.stack);
         }
     }
 }
@@ -70,8 +73,16 @@ export function unload(pluginName: string) {
 
 export async function fetchStore(storeLink: string) {
     if (!storeLink.endsWith("/")) storeLink += "/";
-    const manifestRes = await fetch(storeLink + "manifest.json", { cache: "no-store" });
-    const storeRes = await fetch(storeLink + "store.js", { cache: "no-store" });
+    let manifestRes;
+    let storeRes;
+    try {
+        manifestRes = await fetch(storeLink + "manifest.json", { cache: "no-store" });
+        storeRes = await fetch(storeLink + "store.js", { cache: "no-store" });
+    }
+    catch (e) {
+        logger.warn(e);
+    }
+
     if (!manifestRes.ok || !storeRes.ok) throw new Error(`Request to store "${storeLink}" was unsuccesful.`);
     const manifestJson: PluginStore = await manifestRes.json();
     const storeCode = await storeRes.text();
@@ -80,14 +91,8 @@ export async function fetchStore(storeLink: string) {
 
     logger.groupCollapsed(`Running plugin store ${manifestJson.name}...`);
     try {
-        const scriptElement = document.createElement("script");
-        // @ts-expect-error manifest stuff shush
-        window.Manifest = null;
-        scriptElement.innerHTML = `Manifest=${JSON.stringify(manifestJson)};` + storeCode;
-        scriptElement.id = `_skellycord-plugin-${manifestJson.name.toLowerCase()}`;
-        document.body.appendChild(scriptElement);
         // loadStore() but the store does it itself
-        // (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode);
+        (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode);
         const storeLinks = coreSettings.get("storeLinks", [CORE_STORE_LINK]);
         if (!storeLinks.includes(storeLink)) storeLinks.push(storeLink);
         coreSettings.set("storeLinks", storeLinks);
