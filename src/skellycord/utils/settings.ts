@@ -1,3 +1,5 @@
+import { SETTINGS_KEY } from "./constants";
+
 type Primitives = string | number | boolean;
 type Schema = { [x: string]: Primitives | Primitives[] };
 
@@ -6,8 +8,8 @@ export default class Settings<Config = Schema> {
     private data: Record<string, any>;
     private key: string;
 
-    static openConfig<T = Schema>(configName: string, isPlugin = true) {
-        const key = `${isPlugin ? "SkellyPlugin_" : ""}${configName}`;
+    static openConfig<T = Schema>(configName: string) {
+        const key = `${configName === SETTINGS_KEY ? "" : "SkellyPlugin_"}${configName}`;
         if (this.INSTANCES[key]) return this.INSTANCES[key];
         
         const freshSettings = new Settings<T>(key, false);
