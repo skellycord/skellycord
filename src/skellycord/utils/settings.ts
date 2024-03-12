@@ -47,8 +47,4 @@ export default class Settings<Config = Schema> {
         this.data[key] = value;
         localStorage.setItem(this.key, JSON.stringify(this.data));
     }
-
-    copy() {
-        return Object.freeze(this.data);
-    }
 }
