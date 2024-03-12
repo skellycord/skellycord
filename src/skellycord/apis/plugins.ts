@@ -92,7 +92,7 @@ export async function fetchStore(storeLink: string) {
     logger.groupCollapsed(`Running plugin store ${manifestJson.name}...`);
     try {
         // loadStore() but the store does it itself
-        (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode);
+        (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode + `//# sourceURL=${storeLink}store.js`);
         const storeLinks = coreSettings.get("storeLinks", [CORE_STORE_LINK]);
         if (!storeLinks.includes(storeLink)) storeLinks.push(storeLink);
         coreSettings.set("storeLinks", storeLinks);
