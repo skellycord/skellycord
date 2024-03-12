@@ -80,7 +80,8 @@ export async function fetchStore(storeLink: string) {
         storeRes = await fetch(storeLink + "store.js", { cache: "no-store" });
     }
     catch (e) {
-        logger.warn(e);
+        logger.error("Could not load store:", e);
+        return;
     }
 
     if (!manifestRes.ok || !storeRes.ok) throw new Error(`Request to store "${storeLink}" was unsuccesful.`);
@@ -113,7 +114,6 @@ export enum SettingsTypes {
 export interface SettingsModel {
     displayName: string;
     description?: string;
-    key: string;
     type: SettingsTypes;
     defaultValue: any;
 }
@@ -132,7 +132,7 @@ export interface Plugin {
     }[];
     start?: () => void;
     stop?: () => void;
-    settings?: ({ get, set }) => React.JSX.Element | SettingsModel[];
+    settings?: ({ get, set }) => React.JSX.Element | { [x: string]: SettingsModel };
     /**
      * @readonly Set by plugin api
      */
