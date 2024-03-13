@@ -32,5 +32,3 @@ jobs:
             dist/skellycord.min.js
             dist/preload.min.js
             dist/patcher.min.js
-            dist/skellycord.d.ts
-          
