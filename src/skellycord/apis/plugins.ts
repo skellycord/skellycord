@@ -10,7 +10,7 @@ let coreSettings: settings;
 export async function init() {
     coreSettings = settings.openConfig(SETTINGS_KEY);
     
-    for (const storeLink of coreSettings.get("storeLinks", [CORE_STORE_LINK])) {
+    for (const storeLink of coreSettings.get("storeLinks", []).concat(CORE_STORE_LINK)) {
         try {
             fetchStore(storeLink);
         }
@@ -19,24 +19,6 @@ export async function init() {
                 
             }
             logger.error(`Plugin store "${storeLink}" failed to load`, e.stack);
-        }
-    }
-}
-
-export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
-    store.plugins = plugins;
-    stores[store.name] = store;
-
-    const storesObj = coreSettings.get("stores", {});
-
-    if (!storesObj[store.name]) storesObj[store.name] = {};
-    
-    for (const key of Object.keys(plugins)) {
-        if (typeof storesObj[store.name][key] !== "boolean") storesObj[store.name][key] = store.name === CORE_STORE;
-
-        if (storesObj[store.name][key]) {
-            plugins[key].from = store.name;
-            load(plugins[key]);
         }
     }
 }
@@ -94,7 +76,7 @@ export async function fetchStore(storeLink: string) {
     try {
         // loadStore() but the store does it itself
         (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode + `//# sourceURL=${storeLink}store.js`);
-        const storeLinks = coreSettings.get("storeLinks", [CORE_STORE_LINK]);
+        const storeLinks = coreSettings.get("storeLinks", []);
         if (!storeLinks.includes(storeLink)) storeLinks.push(storeLink);
         coreSettings.set("storeLinks", storeLinks);
         
@@ -103,6 +85,26 @@ export async function fetchStore(storeLink: string) {
         logger.error(`Plugin store ${manifestJson.name} failed to load`, e);
     }
     console.groupEnd();
+}
+
+export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
+    store.plugins = plugins;
+    stores[store.name] = store;
+
+    const storesObj = coreSettings.get("stores", {});
+
+    if (!storesObj[store.name]) storesObj[store.name] = {};
+    
+    for (const key of Object.keys(plugins)) {
+        // was exported via default
+        if ((plugins[key] as any)?.default) plugins[key] = (plugins[key] as any).default;
+        if (typeof storesObj[store.name][key] !== "boolean") storesObj[store.name][key] = store.name === CORE_STORE;
+
+        if (storesObj[store.name][key] ) {
+            plugins[key].from = store.name;
+            load(plugins[key]);
+        }
+    }
 }
 
 export enum SettingsTypes {
