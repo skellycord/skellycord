@@ -1,5 +1,4 @@
 dist
-types/skellycord.d.ts
 package-lock.json
 .vscode
 .DS_Store
