@@ -100,10 +100,8 @@ export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
         if ((plugins[key] as any)?.default) plugins[key] = (plugins[key] as any).default;
         if (typeof storesObj[store.name][key] !== "boolean") storesObj[store.name][key] = store.name === CORE_STORE;
 
-        if (storesObj[store.name][key] ) {
-            plugins[key].from = store.name;
-            load(plugins[key]);
-        }
+        plugins[key].from = store.name;
+        if (storesObj[store.name][key]) load(plugins[key]);
     }
 }
 
