@@ -1,5 +1,5 @@
 export const CORE_STORE = "SkellyStore";
-export const CORE_STORE_LINK = "https://skullbite.github.io/skellystore";
+export const CORE_STORE_LINK = "http://127.0.0.1:8000/";
 export const SETTINGS_KEY = "SkellycordInternal";
 // @ts-expect-error Defined by build tool
 export const MOD_VERSION: string = __MOD_VERSION;

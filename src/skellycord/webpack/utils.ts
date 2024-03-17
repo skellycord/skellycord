@@ -1,9 +1,10 @@
 import { logger } from "@skellycord/utils/logger";
 import { loaded } from "@skellycord/apis/plugins";
+import { WebpackInstance } from "discord-types/other";
 // import { getModule } from "@skellycord/webpack";
 
 let ogPush: Array<any>["push"];
-export let wpRequire;
+export let wpRequire: WebpackInstance;
 export const wpName = "webpackChunkdiscord_app";
 export const sourceBits: { [x: string]: string } = {};
 

@@ -77,7 +77,7 @@ export async function fetchStore(storeLink: string) {
         // loadStore() but the store does it itself
         (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode + `//# sourceURL=${storeLink}store.js`);
         const storeLinks = coreSettings.get("storeLinks", []);
-        if (!storeLinks.includes(storeLink)) storeLinks.push(storeLink);
+        if (storeLink !== CORE_STORE_LINK && !storeLinks.includes(storeLink)) storeLinks.push(storeLink);
         coreSettings.set("storeLinks", storeLinks);
         
     }
