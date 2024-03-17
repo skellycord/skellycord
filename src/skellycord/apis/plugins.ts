@@ -9,8 +9,10 @@ let coreSettings: settings;
 
 export async function init() {
     coreSettings = settings.openConfig(SETTINGS_KEY);
+    const toLoad = coreSettings.get("storeLinks", []);
+    toLoad.splice(0, 0, CORE_STORE_LINK);
     
-    for (const storeLink of coreSettings.get("storeLinks", []).concat(CORE_STORE_LINK)) {
+    for (const storeLink of coreSettings.get("storeLinks", [])) {
         try {
             fetchStore(storeLink);
         }
