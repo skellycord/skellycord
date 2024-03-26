@@ -1,18 +1,17 @@
-import { settings } from "@skellycord/utils";
-import { CORE_STORE, CORE_STORE_LINK, SETTINGS_KEY } from "@skellycord/utils/constants";
-import { logger } from "@skellycord/utils/logger";
+import { StorageObject, openStorage } from "@skellycord/utils/storage";
+import { CORE_STORE, CORE_STORE_LINK, MOD_SETTINGS, MOD_STORAGE_KEY } from "@skellycord/utils/constants";
+import { logger } from "@skellycord/utils";
 
 export const loaded: { [x: string]: Plugin } = {};
 export const stores: { [x: string]: PluginStore } = {};
+const readyCallbacks: (() => void)[] = [];
 
-let coreSettings: settings;
+let coreSettings: StorageObject<typeof MOD_SETTINGS>;
 
 export async function init() {
-    coreSettings = settings.openConfig(SETTINGS_KEY);
-    const toLoad = coreSettings.get("storeLinks", []);
-    toLoad.splice(0, 0, CORE_STORE_LINK);
-    
-    for (const storeLink of coreSettings.get("storeLinks", [])) {
+    coreSettings = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
+
+    for (const storeLink of [CORE_STORE_LINK, ...coreSettings.storeLinks]) {
         try {
             fetchStore(storeLink);
         }
@@ -23,6 +22,8 @@ export async function init() {
             logger.error(`Plugin store "${storeLink}" failed to load`, e.stack);
         }
     }
+
+    for (const i of readyCallbacks) i();
 }
 
 export function load(plugin: Plugin) {
@@ -36,7 +37,7 @@ export function load(plugin: Plugin) {
         console.log(`${plugin.name} successfully started.`);
     }
     catch (e) {
-        console.error(`${plugin.name} failed to start.`, e);
+        console.error(`${plugin.name} failed to start: ${e}`);
     }
 }
 
@@ -59,6 +60,7 @@ export async function fetchStore(storeLink: string) {
     if (!storeLink.endsWith("/")) storeLink += "/";
     let manifestRes;
     let storeRes;
+    const pingTest = Date.now();
     try {
         manifestRes = await fetch(storeLink + "manifest.json", { cache: "no-store" });
         storeRes = await fetch(storeLink + "store.js", { cache: "no-store" });
@@ -71,6 +73,7 @@ export async function fetchStore(storeLink: string) {
     if (!manifestRes.ok || !storeRes.ok) throw new Error(`Request to store "${storeLink}" was unsuccesful.`);
     const manifestJson: PluginStore = await manifestRes.json();
     const storeCode = await storeRes.text();
+    logger.log(`Retreived plugin code in ${Date.now() - pingTest}ms`);
     
     // todo: hash stuff to prevent malicious execution and what no
 
@@ -78,10 +81,11 @@ export async function fetchStore(storeLink: string) {
     try {
         // loadStore() but the store does it itself
         (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode + `//# sourceURL=${storeLink}store.js`);
-        const storeLinks = coreSettings.get("storeLinks", []);
+        const storeLinks = coreSettings.storeLinks;
+
         if (storeLink !== CORE_STORE_LINK && !storeLinks.includes(storeLink)) storeLinks.push(storeLink);
-        coreSettings.set("storeLinks", storeLinks);
-        
+
+        coreSettings.storeLinks = storeLinks;
     }
     catch (e) {
         logger.error(`Plugin store ${manifestJson.name} failed to load`, e);
@@ -93,7 +97,7 @@ export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
     store.plugins = plugins;
     stores[store.name] = store;
 
-    const storesObj = coreSettings.get("stores", {});
+    const storesObj = coreSettings.stores;
 
     if (!storesObj[store.name]) storesObj[store.name] = {};
     
@@ -105,6 +109,10 @@ export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
         plugins[key].from = store.name;
         if (storesObj[store.name][key]) load(plugins[key]);
     }
+}
+
+export function _onReady(fn: () => void) {
+    readyCallbacks.push(fn);
 }
 
 export enum SettingsTypes {
