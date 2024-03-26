@@ -1,5 +1,5 @@
-import { logger } from "@skellycord/utils/logger";
-import { loaded } from "@skellycord/apis/plugins";
+import { logger } from "@skellycord/utils";
+import { loaded, _onReady } from "@skellycord/apis/plugins";
 import { WebpackInstance } from "discord-types/other";
 // import { getModule } from "@skellycord/webpack";
 
@@ -9,6 +9,15 @@ export const wpName = "webpackChunkdiscord_app";
 export const sourceBits: { [x: string]: string } = {};
 
 let _readyListeners;
+let _pluginsReady = false;
+let _mPatched = false;
+const _lazyChunks = [];
+
+_onReady(() => {
+    _pluginsReady = true;
+    for (const chunk of _lazyChunks) patchChunk(chunk);
+});
+
 // const _moduleListeners = [];
 
 export function overridePush() {
@@ -34,8 +43,14 @@ export function overridePush() {
 }
 
 function fakePush(chunk, og) {
-    if (chunk[0][1] !== -1) patchChunk(chunk);
-    if (wpRequire) patchChunk(wpRequire.m, true);
+    if (chunk[0][1] !== -1) {
+        if (!_pluginsReady) _lazyChunks.push(chunk);
+        else patchChunk(chunk);
+    }
+    if (!_mPatched && wpRequire) {
+        patchChunk(wpRequire.m, true);
+        _mPatched = true;
+    }
     
     Reflect.apply(og, window[wpName], [chunk]);
 }
@@ -107,23 +122,22 @@ function patchChunk(chunk, isM = false) {
                         if (toRun === newRun) console.warn("%cPATCH FAILED", "font-weight:200", "Replacement had no effect.");
                         else {
                             try {
-                                (0, eval)("0," + newRun);
+                                (0, eval)("0," + newRun + `\n//#SourceURL=https://modules.skellycord.lol/Early${id}`);
 
                                 successfulPatches++;
                                 toRun = newRun;
 
                                 console.log("%cPATCH SUCCESSFUL", "font-weight:200");
-                                console.groupEnd();
                             }
                             catch (e) {
                                 console.log("PATCH FAILED");
                                 console.error(e.stack);
-                                console.groupEnd();
                                 continue;
                             }
                         }
                         if (successfulPatches) injectedBy.push(plugin.name);
                     }
+                    console.groupEnd();
                 }
             }
 
@@ -131,7 +145,7 @@ function patchChunk(chunk, isM = false) {
             const patchedStr = injectedBy.length ? `Patched By: ${injectedBy.join(", ")}` : "No Patches :(";
             const newMod = (0, eval)(`/*\n* Webpack Module ${id}\n*\n* ${patchedStr}\n*/` + 
             `\n${toRun}\n` +
-            `//# sourceURL=WebpackModule${id}`);
+            `//# sourceURL=WebpackModules${id}`);
         
             Reflect.apply(newMod, null, [m, e, r]);
 

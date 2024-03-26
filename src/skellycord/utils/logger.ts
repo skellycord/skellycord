@@ -4,43 +4,26 @@ interface LogColors {
     error: string;
 }
 
-export default class Logger {
-    logNames: string[] = [];
-    colors: LogColors = {
-        log: "blue",
-        warn: "gold",
-        error: "red"
+export function createLogger(...logNames: string[]) {
+    const logObj = {
+        logNames,
+        colors: {
+            log: "blue",
+            warn: "gold",
+            error: "red"
+        },
+        log: (...data) => console.log(...makeLogNames("log", logNames, logObj.colors), ...data),
+        warn: (...data) => console.warn(...makeLogNames("warn", logNames, logObj.colors), ...data),
+        error: (...data) => console.error(...makeLogNames("error", logNames, logObj.colors), ...data),
+        group: (...data) => console.group(...makeLogNames("log", logNames, logObj.colors), ...data),
+        groupCollapsed: (...data) => console.groupCollapsed(...makeLogNames("log", logNames, logObj.colors), ...data)
     };
 
-    constructor(...logNames: string[]) {
-        this.logNames = logNames;
-    }
-
-    private makeCssBit(logType: keyof LogColors) {
-        return ["%c" + this.logNames.map(v => `[${v}]`).join(" "), `font-weight:bold;color:${this.colors[logType]}`];
-    }
-
-    log(...data) {
-        console.log(...this.makeCssBit("log"), ...data);
-    }
-
-    warn(...data) {
-        console.warn(...this.makeCssBit("warn"), ...data);
-    }
-
-    error(...data) {
-        console.error(...this.makeCssBit("error"), ...data);
-    }
-
-    group(...data) {
-        console.group(...this.makeCssBit("log"), ...data);
-    }
-
-    groupCollapsed(...data) {
-        console.groupCollapsed(...this.makeCssBit("log"), ...data);
-    }
-
-
+    return logObj;
 }
 
-export const logger = new Logger("Skellycord");
+function makeLogNames(logType: keyof LogColors, logNames: string[], colors: LogColors) {
+    return ["%c" + logNames.map(v => `[${v}]`).join(" "), `font-weight:bold;color:${colors[logType]}`];
+}
+
+export default createLogger("Skellycord");

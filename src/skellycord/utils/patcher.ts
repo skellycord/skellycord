@@ -1,4 +1,4 @@
-import { logger } from "./logger";
+import { logger } from ".";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface PatchFuncTypes {

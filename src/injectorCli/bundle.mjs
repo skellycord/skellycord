@@ -32,7 +32,7 @@ async function _build() {
         program.emit(null, (fn, txt) => {
             // replace boring module paths with cool @ ones
             txt = txt.replace(
-                /(declare module|from) "(index|webpack|apis|utils|components)(\/*.*)"/g,
+                /(declare module|from) "(index|webpack|apis|utils)(\/*.*)"/g,
                 "$1 \"@skellycord/$2$3\""
             );
             txt = txt.replace(

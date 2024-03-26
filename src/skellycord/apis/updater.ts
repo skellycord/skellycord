@@ -1,4 +1,4 @@
-import { logger } from "@skellycord/utils/logger";
+import { logger } from "@skellycord/utils";
 import { GITHUB, LAST_COMMIT } from "@skellycord/utils/constants";
 
 export let LAST_COMMITS = [];

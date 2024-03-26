@@ -1,5 +1,6 @@
-import { injectCss, settings } from "@skellycord/utils";
-import { SETTINGS_KEY } from "@skellycord/utils/constants";
+import { injectCss } from "@skellycord/utils";
+import { MOD_SETTINGS, MOD_STORAGE_KEY } from "@skellycord/utils/constants";
+import { openStorage } from "@skellycord/utils/storage";
 
 const cssInjection = injectCss("");
 const quickCssInjection = injectCss("");
@@ -10,22 +11,16 @@ export function init() {
 }
 
 export function reloadWebThemes() {
-    const coreSettings = settings.openConfig(SETTINGS_KEY);
+    const modStorage = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
 
     let newLines = "";
-    const webThemes = coreSettings.get("webThemes", "");
-    for (const line of webThemes.split("\n")) newLines += `@import url(${line});\n`;
+    for (const line of modStorage.webThemes.split("\n")) newLines += `@import url(${line});\n`;
 
     cssInjection.edit(newLines);
 }
 
 export function reloadQuickCss() {
-    const coreSettings = settings.openConfig(SETTINGS_KEY);
+    const modStorage = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
 
-    quickCssInjection.edit(coreSettings.get("quickcss", ""));
-}
-
-export interface Theme {
-    url: string;
-    element: HTMLStyleElement;
+    quickCssInjection.edit(modStorage.quickcss);
 }

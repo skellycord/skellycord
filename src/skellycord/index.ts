@@ -1,18 +1,17 @@
-import { logger } from "./utils/logger";
+import { logger } from "./utils";
 import { overridePush, wpName } from "./webpack/utils";
 import prePatches from "./utils/prePatches";
 import { themes, plugins } from "./apis";
 
 export * as apis from "./apis";
-export * as components from "./components";
 export * as webpack from "./webpack";
 export * as utils from "./utils";
 
 
 function preInit() {
     for (const prePatch of prePatches) prePatch();
-    themes.init();
     plugins.init();
+    themes.init();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", preInit);
