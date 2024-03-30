@@ -28,9 +28,11 @@ if (!discordPath || !fs.existsSync(discordPath)) {
 }
 
 const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
-const coreThing = ["discord_desktop_core"];
-if (platform === "win32") coreThing.splice(0, 0, "discord_desktop_core-1");
-const desktopCoreDir = join(discordPath, appVersion, "modules", ...coreThing);
+let desktopCoreDir = join(discordPath, appVersion, "modules");
+
+if (platform === "win32") desktopCoreDir = join(desktopCoreDir, fs.readdirSync(desktopCoreDir).find(f => f.includes("discord_desktop_core-")));
+
+desktopCoreDir = join(desktopCoreDir, "discord_desktop_core");
 
 const coreFile = fs.readFileSync(join(desktopCoreDir, "index.js"), "utf8");
 
