@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0a",
+  "version": "0.1.2a",
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/react": "^18.2.55",
@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "esbuild": "^0.20.1",
-    "esbuild-monaco-editor-plugin": "^0.1.1",
     "typescript": "^5.4.2"
   }
 }
