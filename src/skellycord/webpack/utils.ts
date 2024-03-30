@@ -97,8 +97,8 @@ function patchChunk(chunk, isM = false) {
             const injectedBy: string[] = [];
 
             for (const plugin of Object.values(loaded)) {
-                if (plugin.patches) for (const patch of Object.values(plugin.patches)) {
-                    if (!toRun.includes(patch.find) || patch.predicate && !patch.predicate(m)) continue;
+                for (const patch of Object.values(plugin.patches ?? {})) {
+                    if ((patch.find instanceof RegExp ? !patch.find.test(toRun) : !toRun.includes(patch.find)) || patch.predicate && !patch.predicate(m)) continue;
                     logger.groupCollapsed(`Match found in WebpackModule${id} (${plugin.name})`);
                     console.log(`Match: (${patch.find})`);
                     // would rather not have the entire function taking up box space
@@ -122,7 +122,7 @@ function patchChunk(chunk, isM = false) {
                         if (toRun === newRun) console.warn("%cPATCH FAILED", "font-weight:200", "Replacement had no effect.");
                         else {
                             try {
-                                (0, eval)("0," + newRun + `\n//#SourceURL=https://modules.skellycord.lol/Early${id}`);
+                                (0, eval)("0," + newRun + `\n//# sourceURL=EarlyModule${id}`);
 
                                 successfulPatches++;
                                 toRun = newRun;
@@ -147,7 +147,14 @@ function patchChunk(chunk, isM = false) {
             `\n${toRun}\n` +
             `//# sourceURL=WebpackModules${id}`);
         
-            Reflect.apply(newMod, null, [m, e, r]);
+            try {
+                Reflect.apply(newMod, null, [m, e, r]);
+            }
+            catch (_e) {
+                logger.error(`WebpackModule${id} was modified errorneously`, _e);
+                Reflect.apply(ogMod, null, [m, e, r]);
+            }
+            
 
         };
 

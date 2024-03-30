@@ -10,9 +10,9 @@ export function getModule(predicate: (m: any) => boolean) {
     }
 }
 
-export function getViaSource(re: RegExp) {
+export function getViaSource(snip: RegExp | string) {
     for (const source of Object.keys(sourceBits)) {
-        if (re.test(sourceBits[source])) return wpRequire.c[source].exports;
+        if (snip instanceof RegExp ? snip.test(sourceBits[source]) : snip.includes(sourceBits[source])) return wpRequire.c[source].exports;
     }
 }
 
