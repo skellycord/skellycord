@@ -19,9 +19,7 @@ const displayTarget = `discord${discordTarget !== "stable" ? `-${discordTarget}`
 
 blue(`Skellycord v${pack.version}`, true);
 blue(`Target: ${discordTarget} ~ OS: ${platform}`, true);
-console.log(discordTarget)
 let discordPath = findPath(discordTarget);
-console.log(discordPath)
 if (!discordPath || !fs.existsSync(discordPath)) {
     red(`No ${displayTarget} installation found.`);
     exit();
@@ -33,8 +31,6 @@ const appVersion = fs.readdirSync(discordPath)
     .find(d => d.startsWith("app") || /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
 
 console.log(`Found Discord app version: ${appVersion}`);
-
-console.log(appVersion)
 let desktopCoreDir = join(discordPath, appVersion, "modules");
 
 if (platform === "win32") desktopCoreDir = join(desktopCoreDir, fs.readdirSync(desktopCoreDir).find(f => f.includes("discord_desktop_core")));
