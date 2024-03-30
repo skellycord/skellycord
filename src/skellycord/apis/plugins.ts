@@ -1,5 +1,5 @@
 import { StorageObject, openStorage } from "@skellycord/utils/storage";
-import { CORE_STORE, CORE_STORE_LINK, MOD_SETTINGS, MOD_STORAGE_KEY } from "@skellycord/utils/constants";
+import { CORE_STORE, CORE_STORE_LINK, MOD_SETTINGS, MOD_STORAGE_KEY, TEMP_CORE_SETTINGS, TEMP_CORE_STORAGE_KEY, TempStoreRunType } from "@skellycord/utils/constants";
 import { logger } from "@skellycord/utils";
 
 export const loaded: { [x: string]: Plugin } = {};
@@ -7,18 +7,36 @@ export const stores: { [x: string]: PluginStore } = {};
 const readyCallbacks: (() => void)[] = [];
 
 let coreSettings: StorageObject<typeof MOD_SETTINGS>;
+export let INTERNAL_PLUGIN: string;
 
 export async function init() {
     coreSettings = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
+    const tempCoreSettings = openStorage(TEMP_CORE_STORAGE_KEY, TEMP_CORE_SETTINGS);
 
-    for (const storeLink of [CORE_STORE_LINK, ...coreSettings.storeLinks]) {
+    switch (tempCoreSettings.loadType) {
+        case TempStoreRunType.PERMANENT:
+            INTERNAL_PLUGIN = tempCoreSettings.link; 
+            logger.log(`Custom core store active: ${INTERNAL_PLUGIN}`);
+            break;
+        case TempStoreRunType.TEMPORARY:
+            if (tempCoreSettings.hasLoaded) {
+                tempCoreSettings.link = null;
+                tempCoreSettings.hasLoaded = false;
+                INTERNAL_PLUGIN = CORE_STORE_LINK;
+            }
+            else {
+                INTERNAL_PLUGIN = tempCoreSettings.link ?? CORE_STORE_LINK;
+                tempCoreSettings.hasLoaded = INTERNAL_PLUGIN !== CORE_STORE_LINK;
+                if (tempCoreSettings.hasLoaded) logger.log(`Custom core store active: ${INTERNAL_PLUGIN}`);
+            }
+    }
+
+    for (const storeLink of [INTERNAL_PLUGIN, ...coreSettings.storeLinks]) {
         try {
             fetchStore(storeLink);
         }
         catch (e) {
-            if (storeLink === CORE_STORE_LINK) {
-                
-            }
+            if (storeLink === INTERNAL_PLUGIN) logger.warn(`Core plugin store (${INTERNAL_PLUGIN}) failed to load, skellycord frontend/settings cannot be shown.`);
             logger.error(`Plugin store "${storeLink}" failed to load`, e.stack);
         }
     }
@@ -58,8 +76,8 @@ export function unload(pluginName: string) {
 
 export async function fetchStore(storeLink: string) {
     if (!storeLink.endsWith("/")) storeLink += "/";
-    let manifestRes;
-    let storeRes;
+    let manifestRes: Response;
+    let storeRes: Response;
     const pingTest = Date.now();
     try {
         manifestRes = await fetch(storeLink + "manifest.json", { cache: "no-store" });
@@ -83,7 +101,7 @@ export async function fetchStore(storeLink: string) {
         (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode + `//# sourceURL=${storeLink}store.js`);
         const storeLinks = coreSettings.storeLinks;
 
-        if (storeLink !== CORE_STORE_LINK && !storeLinks.includes(storeLink)) storeLinks.push(storeLink);
+        if (storeLink !== INTERNAL_PLUGIN && !storeLinks.includes(storeLink)) storeLinks.push(storeLink);
 
         coreSettings.storeLinks = storeLinks;
     }
@@ -134,7 +152,7 @@ export interface Plugin {
     contributors?: string[];
     patches?: {
         predicate?: (module: any) => boolean;
-        find: string;
+        find: string | RegExp;
         replacements: {
             target: RegExp;
             replacement: string | ((_module: any, _exports: any) => string);

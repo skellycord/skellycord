@@ -1,12 +1,15 @@
 export const CORE_STORE = "SkellyStore";
-export const CORE_STORE_LINK = "https://skullbite.github.io/skellystore/";
-
 export const GITHUB = "skullbite/skellycord";
 export const GITHUB_REPO = `https://github.com/${GITHUB}/`;
 export const GUILD_DATA = {
     id: "1207058659037683812",
     invite: "aW3We2VKna"
 };
+
+export enum TempStoreRunType {
+    TEMPORARY,
+    PERMANENT
+}
 
 export const MOD_STORAGE_KEY = "SkellycordInternal";
 export const MOD_SETTINGS = {
@@ -17,6 +20,14 @@ export const MOD_SETTINGS = {
     webThemes: ""
 };
 
+export const TEMP_CORE_STORAGE_KEY = "SkellycordTempCore";
+export const TEMP_CORE_SETTINGS = {
+    link: null,
+    loadType: TempStoreRunType.TEMPORARY,
+    hasLoaded: false
+};
+
+export const CORE_STORE_LINK: string = "https://store.skellycord.rocks/";
 // @ts-expect-error Defined by build tool
 export const MOD_VERSION: string = __MOD_VERSION;
 // @ts-expect-error Defined by build tool
