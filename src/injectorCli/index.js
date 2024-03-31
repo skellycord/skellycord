@@ -19,18 +19,21 @@ const displayTarget = `discord${discordTarget !== "stable" ? `-${discordTarget}`
 
 blue(`Skellycord v${pack.version}`, true);
 blue(`Target: ${discordTarget} ~ OS: ${platform}`, true);
-
 let discordPath = findPath(discordTarget);
-
 if (!discordPath || !fs.existsSync(discordPath)) {
     red(`No ${displayTarget} installation found.`);
     exit();
 }
 
-const appVersion = fs.readdirSync(discordPath).filter(d => !d.startsWith(".")).find(d => /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
+//const appVersion = fs.readdirSync(discordPath).filter(d => d.startsWith("app")).find(d => /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
+const appVersion = fs.readdirSync(discordPath)
+    .filter(d => !d.includes("ico"))
+    .find(d => d.startsWith("app") || /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
+
+console.log(`Found Discord app version: ${appVersion}`);
 let desktopCoreDir = join(discordPath, appVersion, "modules");
 
-if (platform === "win32") desktopCoreDir = join(desktopCoreDir, fs.readdirSync(desktopCoreDir).find(f => f.includes("discord_desktop_core-")));
+if (platform === "win32") desktopCoreDir = join(desktopCoreDir, fs.readdirSync(desktopCoreDir).find(f => f.includes("discord_desktop_core")));
 
 desktopCoreDir = join(desktopCoreDir, "discord_desktop_core");
 
