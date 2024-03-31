@@ -27,7 +27,7 @@ if (!discordPath || !fs.existsSync(discordPath)) {
 
 //const appVersion = fs.readdirSync(discordPath).filter(d => d.startsWith("app")).find(d => /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
 const appVersion = fs.readdirSync(discordPath)
-    .filter(d => !d.includes('ico'))
+    .filter(d => !d.includes("ico"))
     .find(d => d.startsWith("app") || /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
 
 console.log(`Found Discord app version: ${appVersion}`);
