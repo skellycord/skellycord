@@ -30,7 +30,8 @@ const appVersion = fs.readdirSync(discordPath)
     .filter(d => !d.includes("ico"))
     .find(d => d.startsWith("app") || /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(d));
 
-console.log(`Found Discord app version: ${appVersion}`);
+blue(`Found ${displayTarget} app version: ${appVersion}`);
+
 let desktopCoreDir = join(discordPath, appVersion, "modules");
 
 if (platform === "win32") desktopCoreDir = join(desktopCoreDir, fs.readdirSync(desktopCoreDir).find(f => f.includes("discord_desktop_core")));
