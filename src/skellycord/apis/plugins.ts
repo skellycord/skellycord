@@ -13,23 +13,26 @@ export async function init() {
     coreSettings = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
     const tempCoreSettings = openStorage(TEMP_CORE_STORAGE_KEY, TEMP_CORE_SETTINGS);
 
-    switch (tempCoreSettings.loadType) {
-        case TempStoreRunType.PERMANENT:
-            INTERNAL_PLUGIN = tempCoreSettings.link; 
-            logger.log(`Custom core store active: ${INTERNAL_PLUGIN}`);
-            break;
-        case TempStoreRunType.TEMPORARY:
-            if (tempCoreSettings.hasLoaded) {
-                tempCoreSettings.link = null;
-                tempCoreSettings.hasLoaded = false;
-                INTERNAL_PLUGIN = CORE_STORE_LINK;
-            }
-            else {
-                INTERNAL_PLUGIN = tempCoreSettings.link ?? CORE_STORE_LINK;
-                tempCoreSettings.hasLoaded = INTERNAL_PLUGIN !== CORE_STORE_LINK;
-                if (tempCoreSettings.hasLoaded) logger.log(`Custom core store active: ${INTERNAL_PLUGIN}`);
-            }
+    if (tempCoreSettings.link) {
+        switch (tempCoreSettings.loadType) {
+            case TempStoreRunType.PERMANENT:
+                INTERNAL_PLUGIN = tempCoreSettings.link;
+                logger.log(`Custom core store active: ${INTERNAL_PLUGIN}`);
+                break;
+            case TempStoreRunType.TEMPORARY:
+                if (tempCoreSettings.hasLoaded) {
+                    tempCoreSettings.link = null;
+                    tempCoreSettings.hasLoaded = false;
+                    INTERNAL_PLUGIN = CORE_STORE_LINK;
+                }
+                else {
+                    INTERNAL_PLUGIN = tempCoreSettings.link ?? CORE_STORE_LINK;
+                    tempCoreSettings.hasLoaded = INTERNAL_PLUGIN !== CORE_STORE_LINK;
+                    if (tempCoreSettings.hasLoaded) logger.log(`Custom core store active: ${INTERNAL_PLUGIN}`);
+                }
+        }
     }
+    else INTERNAL_PLUGIN = CORE_STORE_LINK;
 
     for (const storeLink of [INTERNAL_PLUGIN, ...coreSettings.storeLinks]) {
         try {
