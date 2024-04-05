@@ -1,5 +1,5 @@
 export const CORE_STORE = "SkellyStore";
-export const GITHUB = "skullbite/skellycord";
+export const GITHUB = "skellycord/skellycord";
 export const GITHUB_REPO = `https://github.com/${GITHUB}/`;
 export const GUILD_DATA = {
     id: "1207058659037683812",
