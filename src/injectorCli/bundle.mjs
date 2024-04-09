@@ -1,23 +1,41 @@
 import { build } from "esbuild";
 import { argv } from "process";
-import constants, { red } from "./constants.js";
+import constants, { makeDirIfNonExistent, red } from "./constants.js";
 const { injectorJoin, green } = constants;
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from "fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync, rmSync } from "fs";
 import ts from "typescript";
 import packageFile from "../../package.json" assert { type: "json" };
+import { createPackage } from "@electron/asar";
+import { join } from "path";
 
 const releaseState = argv.find(f => f.startsWith("--releaseState="))?.split("=")[1] ?? "dev";
 const githubSha = argv.find(f => f.startsWith("--ghSha="))?.split("=")[1] ?? null;
 const makeTypes = argv.find(f => f === "--types") != undefined;
+// const preserveAsarContents = argv.find(f => f === "--preserve") != undefined;
 // const watchMode = argv.includes("--watch");
 
 async function _build() {
-    if (!existsSync(injectorJoin("..", "dist"))) mkdirSync(injectorJoin("..", "dist"));
-    buildFile("electron", [{ out: "patcher.min", in: injectorJoin("electron", "patcher") }]);
+    const distDir = injectorJoin("..", "dist");
+    makeDirIfNonExistent(distDir);
+    makeDirIfNonExistent(join(distDir, "_asarcontents"));
+    
 
-    buildFile("electron", [{ out: "preload.min", in: injectorJoin("electron", "preload") }]);
+    buildFile("electron", [{ out: "_asarcontents/main.min", in: injectorJoin("electron", "main") }]);
 
-    buildFile("mod", [{ out: "skellycord.min", in: injectorJoin("skellycord") }]);
+    buildFile("electron", [{ out: "_asarcontents/preload.min", in: injectorJoin("electron", "preload") }]);
+
+    buildFile("mod", [{ out: "_asarcontents/skellycord.min", in: injectorJoin("skellycord") }]);
+
+    createPackage(
+        join(distDir, "_asarcontents"), 
+        join(distDir, "skellycord.asar")
+    )
+    .catch(e => { 
+        red("skellycord.asar", true, "!");
+        console.error(e);
+    })
+    .then(() => green("skellycord.asar", false, "+"));
+    // .finally(() => { if (!preserveAsarContents) rmSync(join(distDir, "_asarcontents"), { recursive: true, force: true }); });
 
     if (makeTypes) {
         const program = ts.createProgram([injectorJoin("skellycord", "index")], {

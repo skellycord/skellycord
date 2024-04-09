@@ -21,6 +21,7 @@
     "bun:uninject": "bun bun:inject -u"
   },
   "dependencies": {
+    "@electron/asar": "^3.2.9",
     "esbuild": "^0.20.1",
     "typescript": "^5.4.2"
   }

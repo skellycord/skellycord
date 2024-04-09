@@ -20,6 +20,7 @@ exports.TYPE_FLAGS = ["-stable", "-ptb", "-canary"];
 
 const MACOS_PARTIAL_PATH = ["Library", "Application Support"];
 const LINUX_PARTIAL_PATH = [".config"];
+const FLATPAK_PARTIAL_PATH = [".var", "app", "com.discordapp.Discord", "config", "discord"];
 
 function findPath(target) {
     let suffix = target !== "stable" ? target : "";
@@ -30,7 +31,10 @@ function findPath(target) {
             suffix = suffixSplit.join("");
             return join(env.LOCALAPPDATA, "Discord" + suffix);
         case "darwin": return join(homedir(), ...MACOS_PARTIAL_PATH, "discord" + suffix);
-        case "linux": return join(homedir(), ...LINUX_PARTIAL_PATH, "discord" + suffix);
+        case "linux":
+            const LINUX_CONFIG = join(homedir(), ...LINUX_PARTIAL_PATH, "discord" + suffix);
+            if (existsSync(LINUX_CONFIG)) return LINUX_CONFIG;
+            return join(homedir(), ...FLATPAK_PARTIAL_PATH);
     }
 }
 

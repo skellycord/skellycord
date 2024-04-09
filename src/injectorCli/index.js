@@ -5,7 +5,6 @@ const { execSync } = require("child_process");
 const pack = require("../../package.json");
 const { argv0 } = require("process");
 
-
 const { platform, argv, exit } = process;
 
 const rebuild = argv.includes("-r");
@@ -61,7 +60,7 @@ if (!uninject) buildAndCopy();
 else deleteFiles();
 
 let code = "module.exports = require('./core.asar');";
-if (!uninject) code = "require('./skellycord/patcher.min.js');\n" + code;
+if (!uninject) code = "require('./skellycord.asar/main.min.js');\n" + code;
 
 fs.writeFile(join(desktopCoreDir, "index.js"), code, err => {
     if (err) red(`An error occured while writing to the desktop core.\n${err}`);
@@ -86,20 +85,18 @@ function buildAndCopy() {
     
     execSync(cmd);
 
-    blue("Copying files to desktop core...");
-    const buildDir = injectorJoin("..", "dist");
-    if (!fs.existsSync(join(desktopCoreDir, "skellycord"))) fs.mkdirSync(join(desktopCoreDir, "skellycord"));
-    for (const file of fs.readdirSync(buildDir).filter(m => m.includes(".min.js"))) {
-        fs.writeFileSync(join(desktopCoreDir, "skellycord", file), fs.readFileSync(join(buildDir, file)));
-    }
+    blue("Copying skellycord.asar to desktop core...");
+    const skellysar = injectorJoin("..", "dist", "skellycord.asar");
+
+    fs.writeFileSync(join(desktopCoreDir, "skellycord.asar"), fs.readFileSync(skellysar));
 
     if (rebuild) green("Skellycord rebuilt successfully.");
 }
 
 function deleteFiles() {
-    if (fs.existsSync(join(desktopCoreDir, "skellycord"))) {
-        blue("Deleting files from desktop core...");
-        fs.rmdirSync(join(desktopCoreDir, "skellycord"), { recursive: true });
+    if (fs.existsSync(join(desktopCoreDir, "skellycord.asar"))) {
+        blue("Deleting skellycord.asar from desktop core...");
+        fs.rmSync(join(desktopCoreDir, "skellycord.asar"));
     }
 
     /*if (fs.existsSync(injectorJoin("..", "dist"))) {
