@@ -2,8 +2,9 @@ import { injectCss } from "@skellycord/utils";
 import { MOD_SETTINGS, MOD_STORAGE_KEY } from "@skellycord/utils/constants";
 import { openStorage } from "@skellycord/utils/storage";
 
-const cssInjection = injectCss("");
 const quickCssInjection = injectCss("");
+
+export const linkThemes: HTMLLinkElement[] = []; 
 
 export function init() {
     reloadWebThemes();
@@ -13,10 +14,20 @@ export function init() {
 export function reloadWebThemes() {
     const modStorage = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
 
-    let newLines = "";
-    for (const line of modStorage.webThemes.split("\n")) newLines += `@import url(${line});\n`;
+    for (const theme of linkThemes) theme.remove();
+    linkThemes.splice(0, linkThemes.length);
 
-    cssInjection.edit(newLines);
+    for (const line of modStorage.webThemes.split("\n")) {
+        const theme = document.createElement("link");
+        theme.id = "_skellycord_theme_id";
+        theme.href = line;
+        theme.rel = "stylesheet";
+
+        document.body.appendChild(theme);
+        linkThemes.push(theme);
+    }
+
+    // cssInjection.edit(newLines);
 }
 
 export function reloadQuickCss() {
