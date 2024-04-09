@@ -23,10 +23,10 @@ jobs:
           bun bun:build --ghSha=${{ github.sha }}
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          name: nightly
           tag_name: nightly
+          make_latest: true
           generate_release_notes: true
           files: |
             dist/skellycord.asar
