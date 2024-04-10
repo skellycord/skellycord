@@ -1,4 +1,4 @@
-import { MOD_STORAGE_KEY } from "./constants";
+import { MOD_STORAGE_KEY, TEMP_CORE_STORAGE_KEY } from "./constants";
 
 // i don't recommend using objects in your settings but to each their own
 type Primitives = string | number | boolean | object;
@@ -40,4 +40,57 @@ export function openStorage<T extends StorageObject>(storageName: string, initDa
     _storageInstances[key] = storageProxy;
 
     return storageProxy;
+}
+
+export function importSkellycordData() {
+    const fakeInput = document.createElement("input");
+    fakeInput.type = "file";
+    fakeInput.accept = "text/json";
+    fakeInput.click();
+    fakeInput.addEventListener("change", async () => {
+        const text = await fakeInput.files[0].text();
+        const data = JSON.parse(text);
+
+        for (const key of Object.keys(data)) localStorage.setItem(key, data[key]);
+    });
+
+    fakeInput.remove();
+}
+
+export function exportSkellycordData() {
+    const skellyJsonLol = {};
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const curKey = localStorage.key(i);
+        
+        if (
+            curKey !== MOD_STORAGE_KEY &&
+            curKey !== TEMP_CORE_STORAGE_KEY &&
+            !curKey.startsWith("SkellyPlugin_")
+        ) continue;
+
+        skellyJsonLol[curKey] = localStorage.getItem(curKey);
+    }
+
+    const linkThingy = document.createElement("a");
+
+    linkThingy.href = "data:text/json;charset=utf-8,"
+        + encodeURIComponent(JSON.stringify(skellyJsonLol));
+    linkThingy.download = "skellycord_backup.json";
+
+    linkThingy.click();
+    linkThingy.remove();
+}
+
+export function _clearSkellycordData() {
+    for (let i = 0; i < localStorage.length; i++) {
+        const curKey = localStorage.key(i);
+        if (
+            curKey !== MOD_STORAGE_KEY &&
+            curKey !== TEMP_CORE_STORAGE_KEY &&
+            !curKey.startsWith("SkellyPlugin_")
+        ) continue;
+
+        localStorage.removeItem(curKey);
+    }
 }
