@@ -26,9 +26,12 @@ function findPath(target) {
     let suffix = target !== "stable" ? target : "";
     switch (platform) {
         case "win32": 
-            const suffixSplit = suffix.split("");
-            suffixSplit[0] = suffixSplit[0].toUpperCase(0);
-            suffix = suffixSplit.join("");
+            if (suffix.length) {
+                const suffixSplit = suffix.split("");
+                console.log(suffix, suffixSplit);
+                suffixSplit[0] = suffixSplit[0].toUpperCase();
+                suffix = suffixSplit.join("");
+            }
             return join(env.LOCALAPPDATA, "Discord" + suffix);
         case "darwin": return join(homedir(), ...MACOS_PARTIAL_PATH, "discord" + suffix);
         case "linux":

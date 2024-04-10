@@ -74,7 +74,11 @@ function buildAndCopy() {
 
     blue("Building mod...");
     let cmd;
-    switch (argv0) {
+    if (platform === "win32") {
+        if (argv0 === "node") cmd = "npm run build";
+        else if (argv0.includes("bun.exe")) cmd = "bun bun:build";
+    }
+    else switch (argv0) {
         case "node":
         case "npm":
             cmd = "npm run build";
@@ -96,7 +100,13 @@ function buildAndCopy() {
 function deleteFiles() {
     if (fs.existsSync(join(desktopCoreDir, "skellycord.asar"))) {
         blue("Deleting skellycord.asar from desktop core...");
-        fs.rmSync(join(desktopCoreDir, "skellycord.asar"));
+        try {
+            fs.rmSync(join(desktopCoreDir, "skellycord.asar"));
+        }
+        catch (e) {
+            if (e.message.includes("resource busy")) red(`Failed to delete skellycord.asar, close ${displayTarget} and try again.`);
+            exit();
+        }
     }
 
     /*if (fs.existsSync(injectorJoin("..", "dist"))) {
