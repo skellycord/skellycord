@@ -1,8 +1,8 @@
 import { build } from "esbuild";
 import { argv } from "process";
-import constants, { makeDirIfNonExistent, red } from "./constants.js";
+import constants, { blue, makeDirIfNonExistent, red } from "./constants.js";
 const { injectorJoin, green } = constants;
-import { writeFileSync, readFileSync, existsSync, mkdirSync, rmSync } from "fs";
+import { writeFileSync, readFileSync } from "fs";
 import ts from "typescript";
 import packageFile from "../../package.json" assert { type: "json" };
 import { createPackage } from "@electron/asar";
@@ -10,7 +10,7 @@ import { join } from "path";
 
 const releaseState = argv.find(f => f.startsWith("--releaseState="))?.split("=")[1] ?? "dev";
 const githubSha = argv.find(f => f.startsWith("--ghSha="))?.split("=")[1] ?? null;
-const makeTypes = argv.find(f => f === "--types") != undefined;
+const makeTypes = argv.includes("--types");
 // const preserveAsarContents = argv.find(f => f === "--preserve") != undefined;
 // const watchMode = argv.includes("--watch");
 
@@ -18,7 +18,10 @@ async function _build() {
     const distDir = injectorJoin("..", "dist");
     makeDirIfNonExistent(distDir);
     makeDirIfNonExistent(join(distDir, "_asarcontents"));
-    
+
+    blue(`Release State: ${releaseState}`, true, "~");
+    blue(`Github SHA: ${githubSha}`, true, "~");
+    blue(`Types: ${makeTypes}`, true, "~");
 
     buildFile("electron", [{ out: "_asarcontents/main.min", in: injectorJoin("electron", "main") }]);
 
@@ -30,11 +33,11 @@ async function _build() {
         join(distDir, "_asarcontents"), 
         join(distDir, "skellycord.asar")
     )
-    .catch(e => { 
-        red("skellycord.asar", true, "!");
-        console.error(e);
-    })
-    .then(() => green("skellycord.asar", false, "+"));
+        .catch(e => { 
+            red("skellycord.asar", true, "!");
+            console.error(e);
+        })
+        .then(() => green("skellycord.asar", false, "+"));
     // .finally(() => { if (!preserveAsarContents) rmSync(join(distDir, "_asarcontents"), { recursive: true, force: true }); });
 
     if (makeTypes) {
@@ -98,7 +101,7 @@ async function buildFile(compileTarget, entryPoints) {
             extraData.define = {
                 __RELEASE_STATE: `"${releaseState}"`,
                 __MOD_VERSION: `"${packageFile.version}"`,
-                __GH_SHA: !githubSha ? "null" : `"${githubSha}"`
+                __GH_SHA: !githubSha ? "null" : `"${githubSha}"`,
             };
             break;
     }
