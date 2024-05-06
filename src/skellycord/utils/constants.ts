@@ -30,7 +30,7 @@ export const TEMP_CORE_SETTINGS = {
 
 export const CORE_STORE_LINK: string = "https://store.skellycord.rocks/";
 export const IS_DESKTOP: boolean = window?.DiscordNative != undefined;
-export const IS_FLATPAK: boolean = IS_DESKTOP && window?.SkellycordNative == undefined;
+export const IS_FLATPAK: boolean = IS_DESKTOP && !window?.SkellycordNative;
 // @ts-expect-error Defined by build tool
 export const MOD_VERSION: string = __MOD_VERSION;
 // @ts-expect-error Defined by build tool
