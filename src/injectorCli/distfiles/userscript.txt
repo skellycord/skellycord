@@ -1,0 +1,9 @@
+// ==UserScript==
+// @name        $(name)
+// @namespace   $(homepage)
+// @version     $(version)
+// @description $(description)
+// @author      $(author)
+// @match       *://*.discord.com/*
+// @unwrap
+// ==/UserScript==
