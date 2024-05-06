@@ -1,6 +1,7 @@
 import { session } from "electron";
 
 session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders }, cb) => {
+    // this was powercords btw
     Object.keys(responseHeaders)
         .filter(k => (/^content-security-policy/i).test(k))
         .map(k => (delete responseHeaders[k]));
