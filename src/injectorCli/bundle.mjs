@@ -11,6 +11,7 @@ import { join } from "path";
 const releaseState = argv.find(f => f.startsWith("--releaseState="))?.split("=")[1] ?? "dev";
 const githubSha = argv.find(f => f.startsWith("--ghSha="))?.split("=")[1] ?? null;
 const makeTypes = argv.includes("--types");
+// const makeUserScript = argv.includes("--userscript");
 // const preserveAsarContents = argv.find(f => f === "--preserve") != undefined;
 // const watchMode = argv.includes("--watch");
 
@@ -18,6 +19,7 @@ async function _build() {
     const distDir = injectorJoin("..", "dist");
     makeDirIfNonExistent(distDir);
     makeDirIfNonExistent(join(distDir, "_asarcontents"));
+    // makeDirIfNonExistent(join(distDir, "chrome"));
 
     blue(`Release State: ${releaseState}`, true, "~");
     blue(`Github SHA: ${githubSha}`, true, "~");
@@ -136,6 +138,23 @@ function makeFiles(buildRes) {
         const fatPath = out.path.split("/");
         // const backToDist = fatPath.findIndex(p => p === "dist");
         const filename = fatPath[fatPath.length - 1];
+
+        /*if (filename === "skellycord.min.js" && makeUserScript) {
+            let userscriptHeader = readFileSync(join(__dirname, "distfiles", "userscript.txt"), { encoding: "utf-8" });
+            let chromeManifest = readFileSync(join(__dirname, "distfiles", "chrome", "manifest.json"), { encoding: "utf-8" });
+            for (const match of chromeManifest.matchAll(/\$\((.*)\)/g)) {
+                let finalKey = packageFile[match[1]];
+               
+                if (match[1] === "author") finalKey = finalKey.name;
+                chromeManifest = chromeManifest.replace(match[0], finalKey);
+            }
+
+            // userscriptHeader += "\n";
+            
+            writeFileSync(join(out.path, "..", "..", "chrome", "manifest.json"), chromeManifest);
+            writeFileSync(join(out.path, "..", "..", "chrome", "skellycord.js"), code);
+            green("skellycord.userscript.js", false, "+");
+        }*/
         
         try {
             writeFileSync(out.path, code);
