@@ -42,7 +42,7 @@ export function openStorage<T extends StorageObject>(storageName: string, initDa
     return storageProxy;
 }
 
-export function importSkellycordData() {
+export function importData() {
     const fakeInput = document.createElement("input");
     fakeInput.type = "file";
     fakeInput.accept = "text/json";
@@ -51,13 +51,21 @@ export function importSkellycordData() {
         const text = await fakeInput.files[0].text();
         const data = JSON.parse(text);
 
-        for (const key of Object.keys(data)) localStorage.setItem(key, data[key]);
+        for (const key of Object.keys(data)) {
+            if (
+                key !== MOD_STORAGE_KEY &&
+                key !== TEMP_CORE_STORAGE_KEY &&
+                !key.startsWith("SkellyPlugin_")
+            ) continue;
+
+            localStorage.setItem(key, data[key]);
+        }
     });
 
     fakeInput.remove();
 }
 
-export function exportSkellycordData() {
+export function exportData() {
     const skellyJsonLol = {};
 
     for (let i = 0; i < localStorage.length; i++) {
@@ -82,7 +90,7 @@ export function exportSkellycordData() {
     linkThingy.remove();
 }
 
-export function _clearSkellycordData() {
+export function _clearData() {
     for (let i = 0; i < localStorage.length; i++) {
         const curKey = localStorage.key(i);
         if (
