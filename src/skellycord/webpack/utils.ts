@@ -1,5 +1,5 @@
 import { logger } from "@skellycord/utils";
-import { loaded, _onReady } from "@skellycord/apis/plugins";
+import { loaded } from "@skellycord/apis/plugins";
 import { WebpackInstance } from "discord-types/other";
 // import { getModule } from "@skellycord/webpack";
 
@@ -9,15 +9,6 @@ export const wpName = "webpackChunkdiscord_app";
 export const sourceBits: { [x: string]: string } = {};
 
 let _readyListeners;
-let _pluginsReady = false;
-let _mPatched = false;
-const _lazyChunks = [];
-
-_onReady(() => {
-    _pluginsReady = true;
-    for (const chunk of _lazyChunks) patchChunk(chunk);
-});
-
 // const _moduleListeners = [];
 
 export function overridePush() {
@@ -43,15 +34,9 @@ export function overridePush() {
 }
 
 function fakePush(chunk, og) {
-    if (chunk[0][1] !== -1) {
-        if (!_pluginsReady) _lazyChunks.push(chunk);
-        else patchChunk(chunk);
-    }
-    if (!_mPatched && wpRequire) {
-        patchChunk(wpRequire.m, true);
-        _mPatched = true;
-    }
-    
+    if (chunk[0][1] !== -1) patchChunk(chunk);
+    if (wpRequire) patchChunk(wpRequire.m, true);
+
     Reflect.apply(og, window[wpName], [chunk]);
 }
 
@@ -71,8 +56,8 @@ function patchChunk(chunk, isM = false) {
 
     for (const id in modules) {
         const ogMod = Object.freeze(modules[id]);
-        
-        modules[id] = function(m, e, r) {
+
+        modules[id] = function (m, e, r) {
             if (!wpRequire) {
                 wpRequire = r;
                 if (wpRequire) {
@@ -97,12 +82,15 @@ function patchChunk(chunk, isM = false) {
             const injectedBy: string[] = [];
 
             for (const plugin of Object.values(loaded)) {
-                for (const patch of Object.values(plugin.patches ?? {})) {
-                    if ((patch.find instanceof RegExp ? !patch.find.test(toRun) : !toRun.includes(patch.find)) || patch.predicate && !patch.predicate(m)) continue;
-                    logger.groupCollapsed(`Match found in WebpackModule${id} (${plugin.name})`);
-                    console.log(`Match: (${patch.find})`);
+                if (plugin.patches) for (const patch of Object.values(plugin.patches)) {
+                    if (
+                        (patch.find instanceof RegExp ? patch.find.test(toRun) : toRun.includes(patch.find)) && 
+                        (!patch.predicate || (patch.predicate && !patch.predicate(m)))
+                    ) continue;
+                    // logger.groupCollapsed(`Match found in WebpackModule${id} (${plugin.name})`);
+                    // console.log(`Match: (${patch.find})`);
                     // would rather not have the entire function taking up box space
-                    console.log("Original Module:", { _: ogMod });
+                    // console.log("Original Module:", { _: ogMod });
                     // logger.log(toRun);
 
                     for (const replacementIndex in patch.replacements) {
@@ -112,49 +100,47 @@ function patchChunk(chunk, isM = false) {
 
                         switch (typeof replacementGroup.replacement) {
                             case "string":
-                                replacementTxt = replacementGroup.replacement; 
+                                replacementTxt = replacementGroup.replacement;
                                 break;
                             case "function":
                                 replacementTxt = replacementGroup.replacement(m, e);
                         }
-            
+
                         const newRun = toRun.replace(replacementGroup.target, replacementTxt.replaceAll("$self", `window.skellycord.apis.plugins.loaded.${plugin.name}`));
-                        if (toRun === newRun) console.warn("%cPATCH FAILED", "font-weight:200", "Replacement had no effect.");
-                        else {
+                        /*if (toRun === newRun) {
+                            logger.groupCollapsed(`Failed to patched WebpackModule${id} [${plugin.from} - ${plugin.name}]`);
+                            console.log("Replacement had no effect.");
+                            console.groupEnd();
+                        }*/
+                        if (toRun !== newRun) {
                             try {
-                                (0, eval)("0," + newRun + `\n//# sourceURL=EarlyModule${id}`);
+                                (0, eval)("0," + newRun);
 
                                 successfulPatches++;
                                 toRun = newRun;
 
-                                console.log("%cPATCH SUCCESSFUL", "font-weight:200");
+                                logger.log(`Successfully patched WebpackModule${id} [${plugin.from} - ${plugin.name}]`);
                             }
                             catch (e) {
-                                console.log("PATCH FAILED");
+                                logger.groupCollapsed(`Failed to patched WebpackModule${id} [${plugin.from} - ${plugin.name}]`);
+                                console.log(`Final Code: ${toRun}`);
                                 console.error(e.stack);
+                                console.groupEnd();
                                 continue;
                             }
                         }
                         if (successfulPatches) injectedBy.push(plugin.name);
                     }
-                    console.groupEnd();
                 }
             }
 
             toRun = "0," + toRun.replaceAll("\n", "");
             const patchedStr = injectedBy.length ? `Patched By: ${injectedBy.join(", ")}` : "No Patches :(";
-            const newMod = (0, eval)(`/*\n* Webpack Module ${id}\n*\n* ${patchedStr}\n*/` + 
-            `\n${toRun}\n` +
-            `//# sourceURL=WebpackModules${id}`);
-        
-            try {
-                Reflect.apply(newMod, null, [m, e, r]);
-            }
-            catch (_e) {
-                logger.error(`WebpackModule${id} was modified errorneously`, _e);
-                Reflect.apply(ogMod, null, [m, e, r]);
-            }
-            
+            const newMod = (0, eval)(`/*\n* Webpack Module ${id}\n*\n* ${patchedStr}\n*/` +
+                `\n${toRun}\n` +
+                `//# sourceURL=WebpackModule${id}`);
+
+            Reflect.apply(newMod, null, [m, e, r]);
 
         };
 
@@ -166,14 +152,3 @@ export function onReady(callback: (wp) => void) {
     _readyListeners = _readyListeners ?? [];
     _readyListeners.push(callback);
 }
-
-/*export function onModuleLoad(predicate: (m) => boolean, callback: (m) => void) {
-    let testMod: any;
-    try {
-        testMod = getModule(predicate);
-    }
-    catch (e) {} 
-    
-    if (!testMod) _moduleListeners.push([predicate, callback]);
-    else callback(testMod);
-}*/
