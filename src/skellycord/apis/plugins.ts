@@ -4,7 +4,6 @@ import { logger } from "@skellycord/utils";
 
 export const loaded: { [x: string]: Plugin } = {};
 export const stores: { [x: string]: PluginStore } = {};
-const readyCallbacks: (() => void)[] = [];
 
 let coreSettings: StorageObject<typeof MOD_SETTINGS>;
 export let INTERNAL_PLUGIN: string;
@@ -43,8 +42,6 @@ export async function init() {
             logger.error(`Plugin store "${storeLink}" failed to load`, e.stack);
         }
     }
-
-    for (const i of readyCallbacks) i();
 }
 
 export function load(plugin: Plugin) {
@@ -79,21 +76,22 @@ export function unload(pluginName: string) {
 
 export async function fetchStore(storeLink: string) {
     if (!storeLink.endsWith("/")) storeLink += "/";
-    let manifestRes: Response;
-    let storeRes: Response;
+    let manifestRes;
+    let storeRes;
     const pingTest = Date.now();
+
     try {
-        manifestRes = await fetch(storeLink + "manifest.json", { cache: "no-store" });
-        storeRes = await fetch(storeLink + "store.js", { cache: "no-store" });
+        manifestRes = await fetchPluginData(storeLink + "manifest.json");
+        storeRes = await fetchPluginData(storeLink + "store.js");
     }
     catch (e) {
         logger.error("Could not load store:", e);
         return;
     }
 
-    if (!manifestRes.ok || !storeRes.ok) throw new Error(`Request to store "${storeLink}" was unsuccesful.`);
-    const manifestJson: PluginStore = await manifestRes.json();
-    const storeCode = await storeRes.text();
+    // if (!manifestRes.ok || !storeRes.ok) throw new Error(`Request to store "${storeLink}" was unsuccesful.`);
+    const manifestJson: PluginStore = JSON.parse(manifestRes);
+    const storeCode = storeRes;
     logger.log(`Retreived plugin code in ${Date.now() - pingTest}ms`);
     
     // todo: hash stuff to prevent malicious execution and what no
@@ -101,7 +99,7 @@ export async function fetchStore(storeLink: string) {
     logger.groupCollapsed(`Running plugin store ${manifestJson.name}...`);
     try {
         // loadStore() but the store does it itself
-        (0, eval)(`const Manifest=${JSON.stringify(manifestJson)};` + storeCode + `//# sourceURL=${storeLink}store.js`);
+        (0, eval)(`const Manifest=${manifestRes};${storeCode}//# sourceURL=${storeLink}store.js`);
         const storeLinks = coreSettings.storeLinks;
 
         if (storeLink !== INTERNAL_PLUGIN && !storeLinks.includes(storeLink)) storeLinks.push(storeLink);
@@ -132,8 +130,17 @@ export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
     }
 }
 
-export function _onReady(fn: () => void) {
-    readyCallbacks.push(fn);
+/* just a lil short fetch function because xhr is faster it seems */
+export async function fetchPluginData(url: string) {
+    const xhr = new XMLHttpRequest();
+    let data;
+    xhr.open("GET", url);
+    xhr.onload = () => data = xhr.response;
+    xhr.send();
+
+    while (!data) await new Promise(r => setTimeout(r, 1));
+
+    return data;
 }
 
 export enum SettingsTypes {
@@ -150,6 +157,7 @@ export interface SettingsModel {
 }
 
 export interface Plugin {
+    [x: string]: any;
     name: string;
     description: string;
     contributors?: string[];
@@ -163,7 +171,7 @@ export interface Plugin {
     }[];
     start?: () => void;
     stop?: () => void;
-    settings?: ({ get, set }) => React.JSX.Element | { [x: string]: SettingsModel };
+    settings?: () => React.JSX.Element;
     /**
      * @readonly Set by plugin api
      */
