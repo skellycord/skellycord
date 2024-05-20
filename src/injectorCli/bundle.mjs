@@ -1,6 +1,6 @@
 import { build } from "esbuild";
 import { argv } from "process";
-import constants, { blue, makeDirIfNonExistent, red } from "./constants.js";
+import constants, { blue, makeDirIfNonExistent, red } from "./utils";
 const { injectorJoin, green } = constants;
 import { writeFileSync, readFileSync } from "fs";
 import ts from "typescript";
