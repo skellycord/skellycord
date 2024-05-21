@@ -1,7 +1,7 @@
 import * as filters from "./filters";
 import { wpRequire } from "./utils";
 
-export function getModules(predicate: (m: any) => boolean) {
+export function getModules(predicate: (m: any) => boolean, sendModule: boolean = false) {
     const all = [];
     for (const m of Object.values(wpRequire.c) as any[]) { 
         if (!m || !m.exports) continue;
@@ -10,10 +10,10 @@ export function getModules(predicate: (m: any) => boolean) {
             continue;
         }
         if (predicate(m.exports)) {
-            all.push(m.exports);
+            all.push(sendModule ? m : m.exports);
             continue;
         }
-        if (predicate(m.exports?.default)) all.push(m.exports?.default);
+        if (predicate(m.exports?.default)) all.push(sendModule ? m : m.exports?.default);
     }
   
     return all;

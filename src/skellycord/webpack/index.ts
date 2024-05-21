@@ -1,12 +1,12 @@
 import * as filters from "./filters";
 import { sourceBits, wpRequire } from "./utils";
 
-export function getModule(predicate: (m: any) => boolean) {
+export function getModule(predicate: (m: any) => boolean, sendModule: boolean = false) {
     for (const m of Object.values(wpRequire.c) as any[]) {
         if (!m || !m.exports) continue;
         if (predicate(m)) return m;
-        if (predicate(m.exports)) return m.exports;
-        if (predicate(m.exports?.default)) return m.exports?.default;
+        if (predicate(m.exports)) return sendModule ? m : m.exports;
+        if (predicate(m.exports?.default)) return sendModule ? m : m.exports?.default;
     }
 }
 

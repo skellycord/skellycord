@@ -2,9 +2,9 @@ import * as wp from ".";
 import * as filters from "./filters";
 import { wpName, wpRequire } from "./utils";
 
-export async function getModule(predicate: (m: any) => boolean) {
+export async function getModule(predicate: (m: any) => boolean, sendModule: boolean = false) {
     while (!window[wpName] || !wpRequire?.c || !wp.getModule(predicate)) await new Promise(r => setTimeout(r, 1));
-    return wp.getModule(predicate);
+    return wp.getModule(predicate, sendModule);
 }
 
 export async function getViaProps(...props: string[]) {
