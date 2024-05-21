@@ -49,7 +49,6 @@ export function load(plugin: Plugin) {
     if (!plugin || !plugin.name || loaded[plugin.name]) return;
 
     try {
-        // const pluginSettings = new Settings(`SkellycordPlugin_${pluginName}`);
         plugin?.start?.();
         loaded[plugin.name] = plugin;
         console.log(`${plugin.name} successfully started.`);
@@ -119,7 +118,6 @@ export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
     const storesObj = coreSettings.stores;
 
     if (!storesObj[store.name]) storesObj[store.name] = {};
-    
     for (const key of Object.keys(plugins)) {
         // was exported via default
         if ((plugins[key] as any)?.default) plugins[key] = (plugins[key] as any).default;
@@ -171,7 +169,7 @@ export interface Plugin {
     }[];
     start?: () => void;
     stop?: () => void;
-    settings?: () => React.JSX.Element;
+    settings?: (storage: StorageObject) => React.JSX.Element;
     /**
      * @readonly Set by plugin api
      */
