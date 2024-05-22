@@ -141,6 +141,11 @@ export async function fetchPluginData(url: string) {
     return data;
 }
 
+// vencord 2
+export function definePlugin(plugin: Plugin) {
+    return plugin;
+}
+
 export enum SettingsTypes {
     STRING,
     NUMBER,
