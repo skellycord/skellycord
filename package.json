@@ -19,15 +19,13 @@
   "scripts": {
     "build": "node src/injectorCli/bundle.mjs",
     "inject": "node src/injectorCli",
-    "reinject": "npm run inject -- -r",
     "uninject": "npm run inject -- -u",
     "bun:build": "bun src/injectorCli/bundle.mjs",
     "bun:inject": "bun src/injectorCli/index.js",
-    "bun:reinject": "bun bun:inject -r",
     "bun:uninject": "bun bun:inject -u"
   },
   "dependencies": {
-    "@electron/asar": "^3.2.9",
+    "@electron/asar": "^3.2.10",
     "esbuild": "^0.20.1",
     "typescript": "^5.4.2"
   }

@@ -10,7 +10,6 @@ npm i
 
 # Mod Injection
 npm run inject [-- -stable|ptb|canary]
-npm run reinject [-- -stable|ptb|canary]
 npm run uninject [-- -stable|ptb|canary]
 # Mod Development
 npm run build [--types]
@@ -22,7 +21,6 @@ bun i
 
 # Mod Injection
 bun bun:inject [-stable|ptb|canary]
-bun bun:reinject [-stable|ptb|canary]
 bun bun:uninject [-stable|ptb|canary]
 # Mod Development
 bun bun:build [--types]
