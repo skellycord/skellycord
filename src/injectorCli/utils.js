@@ -42,8 +42,8 @@ function findPath(target) {
             break;
         case "linux":
             const LINUX_CONFIG = join(homedir(), ...LINUX_PARTIAL_PATH, "discord" + suffix);
-            if (existsSync(LINUX_CONFIG)) return LINUX_CONFIG;
-            appDir = join(homedir(), ...FLATPAK_PARTIAL_PATH);
+            if (existsSync(LINUX_CONFIG)) appDir = LINUX_CONFIG;
+            else appDir = join(homedir(), ...FLATPAK_PARTIAL_PATH);
     }
     if (!existsSync(appDir)) throw new ReferenceError("No discord path found.");
 
