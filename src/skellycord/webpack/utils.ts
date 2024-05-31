@@ -1,11 +1,7 @@
 import { logger } from "@skellycord/utils";
 import { loaded } from "@skellycord/apis/plugins";
 import { WebpackInstance } from "discord-types/other";
-import { after } from "@skellycord/utils/patcher";
 // import { getModule } from "@skellycord/webpack";
-
-
-
 
 let ogPush: Array<any>["push"];
 export let wpRequire: WebpackInstance;
