@@ -25,21 +25,22 @@ async function _build() {
     blue(`Github SHA: ${githubSha}`, true, "~");
     blue(`Types: ${makeTypes}`, true, "~");
 
-    buildFile("electron", [{ out: "_asarcontents/main.min", in: injectorJoin("electron", "main") }]);
-
-    buildFile("electron", [{ out: "_asarcontents/preload.min", in: injectorJoin("electron", "preload") }]);
-
-    buildFile("mod", [{ out: "_asarcontents/skellycord.min", in: injectorJoin("skellycord") }]);
-
-    createPackage(
-        join(distDir, "_asarcontents"), 
+    Promise.all([
+        buildFile("electron", [{ out: "_asarcontents/main.min", in: injectorJoin("electron", "main") }]),
+        buildFile("electron", [{ out: "_asarcontents/preload.min", in: injectorJoin("electron", "preload") }]),
+        buildFile("mod", [{ out: "_asarcontents/skellycord.min", in: injectorJoin("skellycord") }])
+    ]).then(() => createPackage(
+        join(distDir, "_asarcontents"),
         join(distDir, "skellycord.asar")
     )
-        .catch(e => { 
+        .catch(e => {
             red("skellycord.asar", true, "!");
             console.error(e);
         })
-        .then(() => green("skellycord.asar", false, "+"));
+        .then(() => green("skellycord.asar", false, "+"))
+    );
+
+    
     // .finally(() => { if (!preserveAsarContents) rmSync(join(distDir, "_asarcontents"), { recursive: true, force: true }); });
 
     if (makeTypes) {
