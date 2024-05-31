@@ -3,17 +3,20 @@ import { MOD_STORAGE_KEY } from "../constants";
 // i don't recommend using objects in your settings but to each their own
 type Primitives = string | number | boolean | object;
 type PrimitiveSet = Primitives | Primitives[] | any;
-export type StorageObject<T = { 
+type ChangeListener = (key: string, newVal: PrimitiveSet, oldVal: PrimitiveSet) => void;
+type _StorageObject = { 
     /** @readonly Event listener for storage object changes */
-    _onChange?: (key: string, newVal: PrimitiveSet, oldVal: PrimitiveSet) => void;
+    _onChange?: (listener: ChangeListener) => void;
     [x: string]: PrimitiveSet;
-}> = T;
+};
+
+export type StorageObject<T = _StorageObject> = T & _StorageObject;
 
 const _storageInstances: { [x: string]: StorageObject } = {};
-export function openStorage<T extends StorageObject>(storageName: string, initData: T = undefined): T {
+export function openStorage<T extends _StorageObject>(storageName: string, initData: T = undefined): StorageObject<T> {
     const key = `${storageName === MOD_STORAGE_KEY ? "" : "SkellyPlugin_"}${storageName}`;
 
-    const changeListeners: StorageObject["_onChange"][] = [];
+    const changeListeners: ChangeListener[] = [];
     if (_storageInstances?.[key]) return _storageInstances[key] as any;
     
     let data: any = localStorage.getItem(key);
@@ -22,7 +25,7 @@ export function openStorage<T extends StorageObject>(storageName: string, initDa
     
     const storageProxy = new Proxy(data, {
         get(obj, _key) {
-            if (_key === "_onChange") return (listener: StorageObject["_onChange"]) => changeListeners.push(listener);
+            if (_key === "_onChange") return (listener: ChangeListener) => changeListeners.push(listener);
 
             return obj[_key];
         },
