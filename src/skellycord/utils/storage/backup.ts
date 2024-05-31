@@ -1,26 +1,19 @@
 import { MOD_STORAGE_KEY, TEMP_CORE_STORAGE_KEY } from "../constants";
+import getFileInput from "../getFileInput";
 
-export function importData() {
-    const fakeInput = document.createElement("input");
-    fakeInput.type = "file";
-    fakeInput.accept = "text/json";
-    fakeInput.click();
-    fakeInput.addEventListener("change", async () => {
-        const text = await fakeInput.files[0].text();
-        const data = JSON.parse(text);
+export async function importData() {
+    const input = await getFileInput("application/json");
+    const data = JSON.parse(await input[0].text());
 
-        for (const key of Object.keys(data)) {
-            if (
-                key !== MOD_STORAGE_KEY &&
-                key !== TEMP_CORE_STORAGE_KEY &&
-                !key.startsWith("SkellyPlugin_")
-            ) continue;
+    for (const key of Object.keys(data)) {
+        if (
+            key !== MOD_STORAGE_KEY &&
+            key !== TEMP_CORE_STORAGE_KEY &&
+            !key.startsWith("SkellyPlugin_")
+        ) continue;
 
-            localStorage.setItem(key, data[key]);
-        }
-    });
-
-    fakeInput.remove();
+        localStorage.setItem(key, data[key]);
+    }
 }
 
 export function exportData() {
