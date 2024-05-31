@@ -1,6 +1,6 @@
 import { StorageObject, openStorage } from "@skellycord/utils/storage";
 import { CORE_STORE, CORE_STORE_LINK, MOD_SETTINGS, MOD_STORAGE_KEY, TEMP_CORE_SETTINGS, TEMP_CORE_STORAGE_KEY, TempStoreRunType } from "@skellycord/utils/constants";
-import { logger } from "@skellycord/utils";
+import { logger, quickXHR } from "@skellycord/utils";
 
 export const loaded: { [x: string]: Plugin } = {};
 export const stores: { [x: string]: PluginStore } = {};
@@ -80,8 +80,8 @@ export async function fetchStore(storeLink: string) {
     const pingTest = Date.now();
 
     try {
-        manifestRes = await fetchPluginData(storeLink + "manifest.json");
-        storeRes = await fetchPluginData(storeLink + "store.js");
+        manifestRes = await quickXHR("GET", storeLink + "manifest.json");
+        storeRes = await quickXHR("GET", storeLink + "store.js");
     }
     catch (e) {
         logger.error("Could not load store:", e);
@@ -126,19 +126,6 @@ export function loadStore(store: PluginStore, plugins: PluginStore["plugins"]) {
         plugins[key].from = store.name;
         if (storesObj[store.name][key]) load(plugins[key]);
     }
-}
-
-/* just a lil short fetch function because xhr is faster it seems */
-export async function fetchPluginData(url: string) {
-    const xhr = new XMLHttpRequest();
-    let data;
-    xhr.open("GET", url);
-    xhr.onload = () => data = xhr.response;
-    xhr.send();
-
-    while (!data) await new Promise(r => setTimeout(r, 1));
-
-    return data;
 }
 
 // vencord 2
