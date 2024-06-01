@@ -37,7 +37,7 @@ async function _build() {
             red("skellycord.asar", true, "!");
             console.error(e);
         })
-        .then(() => green("skellycord.asar", false, "+"))
+        .then(() => green("skellycord.asar", true, "+"))
     );
 
     
