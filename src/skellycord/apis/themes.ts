@@ -5,8 +5,8 @@ import { openStorage } from "@skellycord/utils/storage";
 
 const quickCssInjection = injectCss("");
 
-export const linkThemes: HTMLLinkElement[] = []; 
-export const pathThemes: HTMLStyleElement[] = [];
+export const linkThemes: WebTheme[] = []; 
+export const pathThemes: LocalTheme[] = [];
 
 export function init() {
     reloadWebThemes();
@@ -37,7 +37,7 @@ export async function fetchLocalThemes() {
 export async function reloadlocalThemes() {
     if (!IS_DESKTOP) return;
 
-    for (const theme of pathThemes) theme.remove();
+    for (const theme of pathThemes) theme.element.remove();
     pathThemes.splice(0, pathThemes.length);
 
     const storage = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
@@ -48,15 +48,20 @@ export async function reloadlocalThemes() {
         const theme = document.createElement("style");
         theme.innerHTML = await window.SkellycordNative.readFile(path);
 
+        const themeData: LocalTheme = {
+            path,
+            element: theme
+        };
+
         document.body.appendChild(theme);
-        pathThemes.push(theme);
+        pathThemes.push(themeData);
     }
 }
 
 export function reloadWebThemes() {
     const modStorage = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
 
-    for (const theme of linkThemes) theme.remove();
+    for (const theme of linkThemes) theme.element.remove();
     linkThemes.splice(0, linkThemes.length);
 
     for (const line of modStorage.webThemes.split("\n")) {
@@ -66,8 +71,13 @@ export function reloadWebThemes() {
         theme.href = line;
         theme.rel = "stylesheet";
 
+        const themeData: WebTheme = {
+            url: line,
+            element: theme
+        };
+
         document.body.appendChild(theme);
-        linkThemes.push(theme);
+        linkThemes.push(themeData);
     }
 }
 
@@ -75,4 +85,14 @@ export function reloadQuickCss() {
     const modStorage = openStorage(MOD_STORAGE_KEY, MOD_SETTINGS);
 
     quickCssInjection.edit(modStorage.quickcss);
+}
+
+export interface WebTheme {
+    url: string;
+    element: HTMLLinkElement;
+}
+
+export interface LocalTheme {
+    path: string;
+    element: HTMLStyleElement;
 }
