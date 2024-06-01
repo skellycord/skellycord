@@ -63,6 +63,8 @@ const LINUX_PATHS = [
             }
     }
 
+    if (!reactDevToolsPath) return; 
+    
     reactDevToolsPath = join(
         reactDevToolsPath,
         "Default",
