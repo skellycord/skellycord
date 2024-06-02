@@ -1,22 +1,27 @@
-import { logger } from "@skellycord/utils";
+import { logger, quickXHR } from "@skellycord/utils";
 import { GITHUB, LAST_COMMIT } from "@skellycord/utils/constants";
 
 export let LAST_COMMITS = [];
 
 async function initUpdateLoop() {
     const LOOP_SPEED = 60e3 * 15;
-    
-    setInterval(async () => LAST_COMMITS = await getModCommits(), LOOP_SPEED);
+
+    const update = async () => LAST_COMMITS = await getModCommits();
+
+    update().then(() => setInterval(update, LOOP_SPEED));
 }
 
 export async function getModCommits() {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB}/commits`);
-    return await res.json();
+    const res = await quickXHR("GET", `https://api.github.com/repos/${GITHUB}/commits`);
+    return JSON.parse(res);
 }
 
-export function modNeedsToUpdate(commits: any[]) {
-    if (!commits) return false;
-    return commits.findIndex(commit => commit.sha === LAST_COMMIT) != 0;
+export function findCommitPoint() {
+    return LAST_COMMITS.findIndex(commit => commit.sha === LAST_COMMIT);
+}
+
+export function modNeedsToUpdate() {
+    return findCommitPoint() != 0;
 }
 
 if (LAST_COMMIT) initUpdateLoop();
