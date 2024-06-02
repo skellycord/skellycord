@@ -2,7 +2,7 @@ import { build } from "esbuild";
 import { argv } from "process";
 import constants, { blue, makeDirIfNonExistent, red } from "./utils";
 const { injectorJoin, green } = constants;
-import { writeFileSync, readFileSync } from "fs";
+import { writeFileSync, readFileSync, promises } from "fs";
 import ts from "typescript";
 import packageFile from "../../package.json" assert { type: "json" };
 import { createPackage } from "@electron/asar";
@@ -106,6 +106,19 @@ async function buildFile(compileTarget, entryPoints) {
                 __MOD_VERSION: `"${packageFile.version}"`,
                 __GH_SHA: !githubSha ? "null" : `"${githubSha}"`,
             };
+            extraData.plugins = [{
+                name: "CssTextImport",
+                setup(build) {
+                    // just a stripped version of the store import converter
+                    build.onLoad({ filter: /\.css$/ }, async (args) => {
+                        let text = await promises.readFile(args.path, "utf8");
+                        return {
+                            contents: `export default (() => require("@skellycord/utils").injectCss(\`${text.replaceAll("\n", "")}\`))();`,
+                            loader: "js"
+                        };
+                    });
+                }
+            }];
             break;
     }
 
@@ -115,7 +128,7 @@ async function buildFile(compileTarget, entryPoints) {
             outdir: "dist",
             entryPoints,
             write: false,
-            minify: true,
+            minify: releaseState !== "dev",
             bundle: true,
             ...extraData
         });

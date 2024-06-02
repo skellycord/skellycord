@@ -1,5 +1,5 @@
 const { join } = require("path");
-const { red, green, blue, TYPE_FLAGS, findPath, injectorJoin, findDesktopCorePath, deleteAsar } = require("./utils");
+const { blue, TYPE_FLAGS, injectorJoin, deleteAsar } = require("./utils");
 const fs = require("fs");
 const { execSync } = require("child_process");
 const pack = require("../../package.json");
