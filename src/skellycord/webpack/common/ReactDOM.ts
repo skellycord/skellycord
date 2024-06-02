@@ -1,6 +1,6 @@
 import { getViaProps } from "../lazy";
 
-export let ReactDOM: typeof import("react-dom");
+export let ReactDOM: typeof import("react-dom/client");
 
 getViaProps(
     "createPortal",
