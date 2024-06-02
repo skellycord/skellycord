@@ -1,0 +1,37 @@
+#_skellycord-toaster-space {
+    position: relative;
+    display: contents;
+}
+
+.SCToaster {
+    transition: 0.5s;
+    width: 270px;
+    height: 65px;
+    position: absolute;
+    background-color: var(--background-tertiary);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    z-index: 999;
+    top: 10px;
+    right: 10px;
+    /*border-bottom: solid 5px;
+    border-bottom-color: #2d4ca0;*/
+    box-shadow: 3px 4px 9px rgb(0 0 0 / 25%);
+
+    :hover {
+        cursor: pointer;
+    }
+    
+    .title {
+        margin-top: 4px;
+    }
+
+    img {
+        max-width: 35px;
+        max-height: 35px;
+        border-radius: 4px;
+        top: 15px;
+        left: 10px;
+        position: absolute;
+    }
+}
