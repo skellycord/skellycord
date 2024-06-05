@@ -1,5 +1,5 @@
 const { join } = require("path");
-const { findPath, red, green } = require("../utils");
+const { findPath, utils: { red, green } } = require("skellycord-installer");
 const { readFileSync, writeFile } = require("fs");
 
 module.exports = function(target, deleteCallback, exitCallback) {

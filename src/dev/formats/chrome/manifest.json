@@ -1,0 +1,16 @@
+{
+    "name": "$(name)",
+    "manifest_version": 3,
+    "version": "$(version)",
+    "description": "$(description)",
+    "content_security_policy": {
+        "extension_pages": "default-src 'self';"
+    },
+    "content_scripts": [{
+        "matches": ["https://*.discord.com/*"],
+        "js": ["skellycord.min.js"],
+        "match_origin_as_fallback": true,
+        "world": "MAIN",
+        "run_at": "document_start"
+    }]
+}

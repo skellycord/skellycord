@@ -1,4 +1,5 @@
-const { findPath, red, green } = require("../utils");
+
+const { findPath, utils: { red, green } } = require("skellycord-installer");
 const { join } = require("path");
 const { readFileSync, writeFile } = require("fs");
 
