@@ -17,16 +17,18 @@
     "eslint-plugin-react": "latest"
   },
   "scripts": {
-    "build": "node src/injectorCli/bundle.mjs",
-    "inject": "node src/injectorCli",
+    "build": "node src/dev/bundle.mjs",
+    "inject": "node src/dev",
     "uninject": "npm run inject -- -u",
-    "bun:build": "bun src/injectorCli/bundle.mjs",
-    "bun:inject": "bun src/injectorCli/index.js",
+    "bun:build": "bun src/dev/bundle.mjs",
+    "bun:inject": "bun src/dev/index.js",
     "bun:uninject": "bun bun:inject -u"
   },
   "dependencies": {
     "@electron/asar": "^3.2.10",
     "esbuild": "^0.20.1",
-    "typescript": "^5.4.2"
+    "skellycord-installer": "^1.0.2",
+    "typescript": "^5.4.2",
+    "webext-buildtools-chrome-crx-builder": "^1.0.18"
   }
 }
