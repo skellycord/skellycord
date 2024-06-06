@@ -17,17 +17,17 @@
     "eslint-plugin-react": "latest"
   },
   "scripts": {
-    "build": "node src/dev/bundle.mjs",
-    "inject": "node src/dev",
+    "build": "node --no-warnings src/dev/bundle.mjs",
+    "inject": "node --no-warnings src/dev/index.mjs",
     "uninject": "npm run inject -- -u",
     "bun:build": "bun src/dev/bundle.mjs",
-    "bun:inject": "bun src/dev/index.js",
+    "bun:inject": "bun src/dev/index.mjs",
     "bun:uninject": "bun bun:inject -u"
   },
   "dependencies": {
     "@electron/asar": "^3.2.10",
     "esbuild": "^0.20.1",
-    "skellycord-installer": "^1.0.2",
+    "skellycord-installer": "^1.0.5",
     "typescript": "^5.4.2",
     "webext-buildtools-chrome-crx-builder": "^1.0.18"
   }
