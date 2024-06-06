@@ -1,10 +1,10 @@
 import { build } from "esbuild";
 import { argv } from "process";
-import { makeDirIfNonExistent, injectorJoin } from "./utils";
-import { red, green, blue } from "skellycord-installer/src/utils";
+import { makeDirIfNonExistent, injectorJoin } from "./utils.js";
+import { red, green, blue } from "skellycord-installer/src/utils.js";
 import { writeFileSync, readFileSync, promises } from "fs";
 import ts from "typescript";
-import packageFile from "../../package.json" assert { type: "json" };
+import packageFile from "../../package.json" with { type: "json" };
 import { createPackage } from "@electron/asar";
 import { join } from "path";
 

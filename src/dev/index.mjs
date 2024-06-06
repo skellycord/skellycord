@@ -1,30 +1,27 @@
-const { join } = require("path");
-const { TYPE_FLAGS, injectorJoin } = require("./utils");
-const { deleteAsar, utils: { blue } } = require("skellycord-installer");
-const fs = require("fs");
-const { execSync } = require("child_process");
-const pack = require("../../package.json");
-const { argv0 } = require("process");
-const inject = require("./injectorFuncs/inject");
-const _uninject = require("./injectorFuncs/uninject");
+import { join } from "path";
+import { TYPE_FLAGS, injectorJoin } from "./utils.js";
+import { writeFileSync, readFileSync } from "fs";
+import { execSync } from "child_process";
+import pkg from "../../package.json" with { type: "json" };
+import { argv0, platform, argv } from "process";
+import { inject, uninject, utils, deleteAsar } from "skellycord-installer";
+const { blue } = utils;
 
-const { platform, argv } = process;
-
-const uninject = argv.includes("-u");
+const _uninject = argv.includes("-u");
 const noRebuild = argv.includes("-nr");
 
 let discordTarget = "stable"; 
 const flagTarget = TYPE_FLAGS.find(flag => argv.some(arg => arg.toLowerCase() === flag));
 if (flagTarget) discordTarget = flagTarget.replace("-", "");
 
-blue(`Skellycord v${pack.version}`, true);
+blue(`Skellycord v${pkg.version}`, true);
 blue(`Target: ${discordTarget} ~ OS: ${platform}`, true);
-if (!uninject) inject(
+if (!_uninject) inject(
     discordTarget,
     buildAndCopy,
     process.exit
 );
-else _uninject(
+else uninject(
     discordTarget,
     deleteAsar,
     process.exit
@@ -57,5 +54,5 @@ async function buildAndCopy(corePath) {
     blue("Copying skellycord.asar to desktop core...");
     const skellysar = injectorJoin("..", "dist", "skellycord.asar");
 
-    fs.writeFileSync(join(corePath, "skellycord.asar"), fs.readFileSync(skellysar));
+    writeFileSync(join(corePath, "skellycord.asar"), readFileSync(skellysar));
 }
